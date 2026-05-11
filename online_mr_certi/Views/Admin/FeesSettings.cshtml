@@ -1,0 +1,55 @@
+@model List<online_mr_certi.Models.Fee>
+@{
+    ViewData["Title"] = "";
+}
+<div class="d-flex justify-content-end mb-2 px-2">
+    <a asp-action="CreateFee" class="btn btn-sm btn-success me-5"><i class="fas fa-plus"></i> Create fee</a>
+</div>
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">All Fees</h3>
+        
+    </div>
+    <div class="card-body p-0">
+        @if (Model.Count == 0)
+        {
+            <p class="p-3 mb-0 text-muted">No fees defined. <a asp-action="CreateFee">Create the first fee</a>.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Service</th>
+                            <th>Amount</th>
+                            <th>Currency</th>
+                            <th>Active</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var f in Model)
+                        {
+                            <tr>
+                                <td>@f.Id</td>
+                                <td>@f.ServiceName</td>
+                                <td>@f.Amount.ToString("N2")</td>
+                                <td>@f.Currency</td>
+                                <td>@(f.IsActive ? "Yes" : "No")</td>
+                                <td class="text-right text-nowrap">
+                                    <a asp-action="EditFee" asp-route-id="@f.Id" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i> Edit</a>
+                                    @* <a asp-action="DeleteFee" asp-route-id="@f.Id" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i> Delete</a> *@
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+    <div class="card-footer text-muted small">
+        New applications use the <strong>first active fee</strong> (lowest Id). Deactivate fees you no longer offer.
+    </div>
+</div>

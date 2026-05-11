@@ -1,0 +1,270 @@
+@model online_mr_certi.Models.MarriageApplication
+@using online_mr_certi.Models
+@{
+    ViewData["Title"] = "Application #" + Model.Id;
+    var w1 = Model.Witnesses.OrderBy(x => x.SortOrder).FirstOrDefault(x => x.SortOrder == 1);
+    var w2 = Model.Witnesses.OrderBy(x => x.SortOrder).FirstOrDefault(x => x.SortOrder == 2);
+
+    Document? Doc(string cat) => Model.Documents.FirstOrDefault(d => d.Category == cat);
+    var supportingDocs = Model.Documents
+        .Where(d => d.Category == DocumentCategories.Supporting)
+        .OrderBy(d => d.Id)
+        .ToList();
+}
+
+<div class="row mb-3">
+    <div class="col-md-8">
+        <h3>Application #@Model.Id</h3>
+        <p class="text-muted mb-0">Applicant: @Model.User.Name (@Model.User.Email)</p>
+    </div>
+    <div class="col-md-4 text-md-right">
+        @if (Model.Status == ApplicationStatus.PendingPayment)
+        { <span class="badge badge-secondary badge-lg">Pending Payment</span> }
+        else if (Model.Status == ApplicationStatus.Pending)
+        { <span class="badge badge-warning badge-lg">Pending</span> }
+        else if (Model.Status == ApplicationStatus.Approved)
+        { <span class="badge badge-success badge-lg">Approved</span> }
+        else
+        { <span class="badge badge-danger badge-lg">Rejected</span> }
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mb-3">
+        <div class="card card-primary card-outline h-100">
+            <div class="card-header"><h3 class="card-title mb-0">Husband</h3></div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Name</dt><dd class="col-sm-8">@Model.HusbandName</dd>
+                    <dt class="col-sm-4">DOB</dt><dd class="col-sm-8">@Model.HusbandDob.ToString("yyyy-MM-dd")</dd>
+                    <dt class="col-sm-4">ID / Passport #</dt><dd class="col-sm-8">@Model.HusbandIdNumber</dd>
+                    <dt class="col-sm-4">Contact</dt><dd class="col-sm-8">@Model.HusbandContactNumber</dd>
+                    <dt class="col-sm-4">Address</dt><dd class="col-sm-8">@Model.HusbandAddress</dd>
+                </dl>
+                <hr class="my-3" />
+                <h5 class="text-muted text-sm mb-2">Husband — uploads</h5>
+                <dl class="row mb-0 small">
+                    <dt class="col-sm-5">ID / Passport file</dt>
+                    <dd class="col-sm-7"><partial name="_AdminDocumentPreview" model="Doc(DocumentCategories.HusbandIdentityDocument)" /></dd>
+                    <dt class="col-sm-5">Husband photo</dt>
+                    <dd class="col-sm-7"><partial name="_AdminDocumentPreview" model="Doc(DocumentCategories.HusbandPassportPhoto)" /></dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 mb-3">
+        <div class="card card-info card-outline h-100">
+            <div class="card-header"><h3 class="card-title mb-0">Wife</h3></div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Name</dt><dd class="col-sm-8">@Model.WifeName</dd>
+                    <dt class="col-sm-4">DOB</dt><dd class="col-sm-8">@Model.WifeDob.ToString("yyyy-MM-dd")</dd>
+                    <dt class="col-sm-4">ID / Passport #</dt><dd class="col-sm-8">@Model.WifeIdNumber</dd>
+                    <dt class="col-sm-4">Contact</dt><dd class="col-sm-8">@Model.WifeContactNumber</dd>
+                    <dt class="col-sm-4">Address</dt><dd class="col-sm-8">@Model.WifeAddress</dd>
+                </dl>
+                <hr class="my-3" />
+                <h5 class="text-muted text-sm mb-2">Wife — uploads</h5>
+                <dl class="row mb-0 small">
+                    <dt class="col-sm-5">ID / Passport file</dt>
+                    <dd class="col-sm-7"><partial name="_AdminDocumentPreview" model="Doc(DocumentCategories.WifeIdentityDocument)" /></dd>
+                    <dt class="col-sm-5">Wife photo</dt>
+                    <dd class="col-sm-7"><partial name="_AdminDocumentPreview" model="Doc(DocumentCategories.WifePassportPhoto)" /></dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    @if (w1 != null)
+    {
+        <div class="col-lg-6 mb-3">
+            <div class="card card-secondary card-outline h-100">
+                <div class="card-header"><h3 class="card-title mb-0">Witness 1 (Markhaatiye 1)</h3></div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Name</dt><dd class="col-sm-8">@w1.FullName</dd>
+                        <dt class="col-sm-4">DOB</dt><dd class="col-sm-8">@w1.DateOfBirth.ToString("yyyy-MM-dd")</dd>
+                        <dt class="col-sm-4">ID / Passport #</dt><dd class="col-sm-8">@w1.IdNumber</dd>
+                        <dt class="col-sm-4">Contact</dt><dd class="col-sm-8">@w1.ContactNumber</dd>
+                        <dt class="col-sm-4">Address</dt><dd class="col-sm-8">@w1.Address</dd>
+                    </dl>
+                    <hr class="my-3" />
+                    <h5 class="text-muted text-sm mb-2">Witness 1 — ID upload</h5>
+                    <dl class="row mb-0 small">
+                        <dt class="col-sm-5">ID / Passport file</dt>
+                        <dd class="col-sm-7"><partial name="_AdminDocumentPreview" model="Doc(DocumentCategories.Witness1IdentityDocument)" /></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    }
+    @if (w2 != null)
+    {
+        <div class="col-lg-6 mb-3">
+            <div class="card card-secondary card-outline h-100">
+                <div class="card-header"><h3 class="card-title mb-0">Witness 2 (Markhaatiye 2)</h3></div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Name</dt><dd class="col-sm-8">@w2.FullName</dd>
+                        <dt class="col-sm-4">DOB</dt><dd class="col-sm-8">@w2.DateOfBirth.ToString("yyyy-MM-dd")</dd>
+                        <dt class="col-sm-4">ID / Passport #</dt><dd class="col-sm-8">@w2.IdNumber</dd>
+                        <dt class="col-sm-4">Contact</dt><dd class="col-sm-8">@w2.ContactNumber</dd>
+                        <dt class="col-sm-4">Address</dt><dd class="col-sm-8">@w2.Address</dd>
+                    </dl>
+                    <hr class="my-3" />
+                    <h5 class="text-muted text-sm mb-2">Witness 2 — ID upload</h5>
+                    <dl class="row mb-0 small">
+                        <dt class="col-sm-5">ID / Passport file</dt>
+                        <dd class="col-sm-7"><partial name="_AdminDocumentPreview" model="Doc(DocumentCategories.Witness2IdentityDocument)" /></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="card mb-3">
+    <div class="card-header"><h3 class="card-title mb-0">Marriage</h3></div>
+    <div class="card-body">
+        <p><strong>Date:</strong> @Model.MarriageDate.ToString("yyyy-MM-dd")</p>
+        <p><strong>Location:</strong> @Model.MarriageLocation</p>
+        <p class="mb-0"><strong>Submitted:</strong> @Model.SubmissionDate.ToString("yyyy-MM-dd HH:mm") UTC</p>
+        @if (!string.IsNullOrEmpty(Model.Remarks))
+        {
+            <hr />
+            <p class="mb-0"><strong>Remarks:</strong> @Model.Remarks</p>
+        }
+    </div>
+</div>
+
+@if (supportingDocs.Count > 0)
+{
+    <div class="card mb-3">
+        <div class="card-header"><h3 class="card-title mb-0">Additional supporting documents</h3></div>
+        <div class="card-body">
+            <ul class="mb-0">
+                @foreach (var d in supportingDocs)
+                {
+                    <li>
+                        <a target="_blank" href="~/@d.FilePath">@System.IO.Path.GetFileName(d.FilePath)</a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+}
+
+@if (Model.Certificate != null)
+{
+    <div class="alert alert-info">
+        Certificate on file: <code>@Model.Certificate.CertificateFile</code>
+    </div>
+}
+
+@if (Model.Payment != null)
+{
+    <div class="card card-warning card-outline mb-3">
+        <div class="card-header"><h3 class="card-title mb-0">Payment</h3></div>
+        <div class="card-body">
+            @if (Model.Payment.Fee != null)
+            {
+                <p><strong>Fee:</strong> @Model.Payment.Fee.ServiceName (@Model.Payment.Fee.Currency)</p>
+            }
+            <p><strong>Amount:</strong> @Model.Payment.Amount.ToString("N2")</p>
+            <p><strong>Sender phone:</strong> @(string.IsNullOrEmpty(Model.Payment.SenderPhone) ? "—" : Model.Payment.SenderPhone)</p>
+            <p><strong>Transaction #:</strong> @(string.IsNullOrEmpty(Model.Payment.TransactionNumber) ? "—" : Model.Payment.TransactionNumber)</p>
+            <p><strong>Payment status:</strong> @Model.Payment.PaymentStatus</p>
+            <p><strong>Payment date:</strong> @(Model.Payment.PaymentDate?.ToString("yyyy-MM-dd HH:mm") ?? "—") UTC</p>
+            @if (!string.IsNullOrEmpty(Model.Payment.ReceiptImage))
+            {
+                <p class="mb-0"><a target="_blank" href="~/@Model.Payment.ReceiptImage">View receipt</a></p>
+            }
+            else
+            {
+                <p class="text-muted mb-0">No receipt uploaded.</p>
+            }
+            <a asp-action="PaymentDetails" asp-route-id="@Model.Payment.Id" class="btn btn-sm btn-default mt-2">Open payment record</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">No payment record for this application.</div>
+}
+
+<div class="card card-outline card-secondary">
+    <div class="card-header"><h3 class="card-title mb-0">Actions</h3></div>
+    <div class="card-body">
+        <a asp-action="EditApplication" asp-route-id="@Model.Id" class="btn btn-info mb-3">
+            <i class="fas fa-edit"></i> Edit application
+        </a>
+        <a asp-action="DeleteApplication" asp-route-id="@Model.Id" class="btn btn-danger mb-3">
+            <i class="fas fa-trash"></i> Delete application
+        </a>
+        <hr />
+        @if (Model.Status == ApplicationStatus.PendingPayment)
+        {
+            <div class="alert alert-info mb-3">
+                This application is waiting for the applicant to complete fee payment and submit proof.
+                @if (Model.Payment != null)
+                {
+                    <a asp-action="PaymentDetails" asp-route-id="@Model.Payment.Id" class="alert-link">Review payment</a>
+                }
+            </div>
+            <hr />
+            <form asp-action="Reject" method="post" class="mt-2">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" value="@Model.Id" />
+                <div class="form-group">
+                    <label>Rejection remarks (optional)</label>
+                    <textarea name="Remarks" class="form-control" rows="2" maxlength="2000"></textarea>
+                </div>
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Reject this application?');"><i class="fas fa-times"></i> Reject</button>
+            </form>
+        }
+        else if (Model.Status == ApplicationStatus.Pending)
+        {
+            @if (Model.Payment != null && Model.Payment.PaymentStatus == PaymentStatuses.Approved)
+            {
+                <form asp-action="Approve" method="post" class="d-inline" onsubmit="return confirm('Approve this application and generate the PDF certificate?');">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Approve &amp; generate certificate</button>
+                </form>
+            }
+            else if (Model.Payment != null)
+            {
+                <div class="alert alert-warning">
+                    Application approval is disabled until the fee payment is <strong>Approved</strong>.
+                    Current payment status: <strong>@Model.Payment.PaymentStatus</strong>.
+                    <a asp-action="PaymentDetails" asp-route-id="@Model.Payment.Id" class="alert-link">Open payment</a>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-danger">Missing payment record.</div>
+            }
+            <hr />
+            <form asp-action="Reject" method="post" class="mt-2">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" value="@Model.Id" />
+                <div class="form-group">
+                    <label>Rejection remarks (optional)</label>
+                    <textarea name="Remarks" class="form-control" rows="2" maxlength="2000"></textarea>
+                </div>
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Reject this application?');"><i class="fas fa-times"></i> Reject</button>
+            </form>
+        }
+        else if (Model.Status == ApplicationStatus.Approved)
+        {
+            <form asp-action="RegenerateCertificate" method="post" class="d-inline" onsubmit="return confirm('Regenerate certificate PDF?');">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button type="submit" class="btn btn-warning"><i class="fas fa-redo"></i> Regenerate certificate</button>
+            </form>
+        }
+        <a asp-action="Applications" class="btn btn-default ml-2">Back to list</a>
+    </div>
+</div>

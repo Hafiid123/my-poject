@@ -1,0 +1,493 @@
+﻿@{
+    ViewData["Title"] = "Services";
+}
+
+<style>
+    :root {
+        --primary: #1E66D0;
+        --primary-dark: #1757b8;
+        --primary-light: #e8f0fc;
+        --btn-blue: #2F80ED;
+        --bg: #F5F7FA;
+        --bg-white: #ffffff;
+        --text-dark: #333333;
+        --text-mid: #555555;
+        --text-muted: #888888;
+        --border: #e2e8f0;
+        --shadow-sm: 0 1px 4px rgba(0,0,0,0.07);
+        --shadow-md: 0 4px 18px rgba(30,102,208,0.12);
+    }
+
+    body {
+        background: var(--bg) !important;
+        color: var(--text-dark) !important;
+        overflow-x: hidden !important;
+    }
+
+    .fullbleed {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        position: relative !important;
+        left: 50% !important;
+        margin-left: -50vw !important;
+        margin-right: -50vw !important;
+    }
+
+    /* ── PAGE HERO ── */
+    .page-hero {
+        background: linear-gradient(135deg, #f0f5ff 0%, #e8f0fc 60%, #dbeafe 100%);
+        padding: 80px 40px 60px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        border-bottom: 1px solid var(--border);
+    }
+
+        .page-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 70% 50%, rgba(30,102,208,0.08) 0%, transparent 60%);
+        }
+
+    .page-hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--primary-light);
+        border: 1px solid rgba(30,102,208,0.2);
+        border-radius: 100px;
+        padding: 5px 14px;
+        margin-bottom: 20px;
+        color: var(--primary);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .page-hero h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(32px, 4vw, 48px);
+        color: var(--text-dark);
+        font-weight: 700;
+        margin-bottom: 14px;
+        position: relative;
+    }
+
+        .page-hero h1 span {
+            color: var(--primary);
+        }
+
+    .page-hero p {
+        color: var(--text-mid);
+        font-size: 17px;
+        line-height: 1.65;
+        max-width: 560px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* ── SERVICES GRID ── */
+    .services-section {
+        background: var(--bg);
+        padding: 80px 40px;
+    }
+
+    .services-grid {
+        max-width: 1060px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+    }
+
+    @@media (max-width: 900px) {
+        .services-grid {
+            grid-template-columns: repeat(2,1fr);
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .services-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .service-card {
+        background: var(--bg-white);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 32px 28px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s;
+        box-shadow: var(--shadow-sm);
+    }
+
+        .service-card:hover {
+            border-color: rgba(30,102,208,0.3);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-5px);
+        }
+
+        .service-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .service-card:hover::after {
+            opacity: 1;
+        }
+
+    .service-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        background: var(--primary-light);
+        border: 1px solid rgba(30,102,208,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        margin-bottom: 20px;
+    }
+
+    .service-title {
+        color: var(--text-dark);
+        font-size: 17px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .service-desc {
+        color: var(--text-mid);
+        font-size: 14px;
+        line-height: 1.65;
+        margin-bottom: 20px;
+    }
+
+    .service-tag {
+        display: inline-block;
+        background: var(--primary-light);
+        color: var(--primary);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.4px;
+        padding: 4px 12px;
+        border-radius: 100px;
+        border: 1px solid rgba(30,102,208,0.15);
+    }
+
+    /* ── HOW TO APPLY ── */
+    .apply-section {
+        background: var(--bg-white);
+        padding: 80px 40px;
+        border-top: 1px solid var(--border);
+    }
+
+    .section-label {
+        text-align: center;
+        color: var(--primary);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+
+    .section-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 36px;
+        color: var(--text-dark);
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+        .section-title span {
+            color: var(--primary);
+        }
+
+    .timeline {
+        max-width: 700px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .timeline-item {
+        display: flex;
+        gap: 24px;
+        align-items: flex-start;
+        position: relative;
+        padding-bottom: 36px;
+    }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+            .timeline-item:last-child .t-line {
+                display: none;
+            }
+
+    .t-left {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .t-dot {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--primary-light);
+        border: 2px solid var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 15px;
+        z-index: 1;
+    }
+
+    .t-line {
+        width: 2px;
+        flex: 1;
+        background: var(--border);
+        min-height: 36px;
+        margin-top: 4px;
+    }
+
+    .t-content {
+        padding-top: 8px;
+    }
+
+    .t-title {
+        color: var(--text-dark);
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .t-desc {
+        color: var(--text-mid);
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    /* ── CTA BANNER ── */
+    .cta-section {
+        background: linear-gradient(135deg, var(--primary) 0%, #2F80ED 100%);
+        padding: 70px 40px;
+        text-align: center;
+    }
+
+        .cta-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 34px;
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .cta-section p {
+            color: rgba(255,255,255,0.8);
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+
+    .btn-cta {
+        padding: 14px 36px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        background: #fff;
+        color: var(--primary);
+        border: none;
+        cursor: pointer;
+        font-family: 'DM Sans', sans-serif;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.15);
+    }
+
+        .btn-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(0,0,0,0.2);
+            color: var(--primary);
+        }
+
+    .btn-cta-outline {
+        padding: 14px 36px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 500;
+        background: transparent;
+        color: #fff;
+        border: 1.5px solid rgba(255,255,255,0.5);
+        cursor: pointer;
+        font-family: 'DM Sans', sans-serif;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s;
+        margin-left: 12px;
+    }
+
+        .btn-cta-outline:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border-color: #fff;
+        }
+
+    .cta-btns {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+</style>
+
+<!-- PAGE HERO -->
+<div class="page-hero fullbleed">
+    <div class="page-hero-badge">⚙️ &nbsp; Our Services</div>
+    <h1>Services We <span>Provide</span></h1>
+    <p>Everything you need to register your marriage officially — from application to certified PDF certificate.</p>
+</div>
+
+<!-- SERVICES GRID -->
+<div class="services-section fullbleed">
+    <div class="services-grid">
+
+        <div class="service-card">
+            <div class="service-icon">📋</div>
+            <div class="service-title">Online Application</div>
+            <div class="service-desc">Submit your marriage application fully online — no office visits required. Fill in all required details from any device, anywhere.</div>
+            <span class="service-tag">Free</span>
+        </div>
+
+        <div class="service-card">
+            <div class="service-icon">📎</div>
+            <div class="service-title">Document Upload</div>
+            <div class="service-desc">Securely upload all supporting documents — ID copies, witness statements, and ceremony evidence — directly through the portal.</div>
+            <span class="service-tag">Secure</span>
+        </div>
+
+        <div class="service-card">
+            <div class="service-icon">🔍</div>
+            <div class="service-title">Application Tracking</div>
+            <div class="service-desc">Monitor your application status in real-time. Know exactly where your submission stands — pending, under review, or approved.</div>
+            <span class="service-tag">Real-time</span>
+        </div>
+
+        <div class="service-card">
+            <div class="service-icon">✅</div>
+            <div class="service-title">Staff Review</div>
+            <div class="service-desc">Trained officials review your submission thoroughly. You'll receive clear feedback with approval confirmation or revision remarks.</div>
+            <span class="service-tag">Official</span>
+        </div>
+
+        <div class="service-card">
+            <div class="service-icon">📄</div>
+            <div class="service-title">PDF Certificate</div>
+            <div class="service-desc">Upon approval, instantly download your officially verified marriage certificate as a signed, printable PDF document.</div>
+            <span class="service-tag">Instant</span>
+        </div>
+
+        <div class="service-card">
+            <div class="service-icon">💬</div>
+            <div class="service-title">Live Support</div>
+            <div class="service-desc">Need help? Our support team is available via WhatsApp to guide you through every step of the application process.</div>
+            <span class="service-tag">24/7</span>
+        </div>
+
+    </div>
+</div>
+
+<!-- HOW TO APPLY TIMELINE -->
+<div class="apply-section fullbleed">
+    <p class="section-label">Application Process</p>
+    <h2 class="section-title">How to <span>Apply</span></h2>
+
+    <div class="timeline">
+        <div class="timeline-item">
+            <div class="t-left">
+                <div class="t-dot">1</div>
+                <div class="t-line"></div>
+            </div>
+            <div class="t-content">
+                <div class="t-title">Create Your Account</div>
+                <div class="t-desc">Register on the portal with your full name, phone number, and a secure password. Verification is instant.</div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="t-left">
+                <div class="t-dot">2</div>
+                <div class="t-line"></div>
+            </div>
+            <div class="t-content">
+                <div class="t-title">Fill in the Application Form</div>
+                <div class="t-desc">Enter complete details for both spouses — full names, ID numbers, date of ceremony, and witness information.</div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="t-left">
+                <div class="t-dot">3</div>
+                <div class="t-line"></div>
+            </div>
+            <div class="t-content">
+                <div class="t-title">Upload Supporting Documents</div>
+                <div class="t-desc">Attach scanned copies of national IDs, witness signatures, and any other required documentation as specified.</div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="t-left">
+                <div class="t-dot">4</div>
+                <div class="t-line"></div>
+            </div>
+            <div class="t-content">
+                <div class="t-title">Submit &amp; Track</div>
+                <div class="t-desc">Submit your application and track its progress from your dashboard. You'll be notified at every stage.</div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="t-left">
+                <div class="t-dot">5</div>
+                <div class="t-line"></div>
+            </div>
+            <div class="t-content">
+                <div class="t-title">Download Your Certificate</div>
+                <div class="t-desc">Once approved by staff, download your official marriage certificate as a verified PDF — ready to print or share.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA BANNER -->
+<div class="cta-section fullbleed">
+    <h2>Ready to Get Started?</h2>
+    <p>Create your account today and begin your marriage certificate application in minutes.</p>
+    <div class="cta-btns">
+        <a class="btn-cta" asp-controller="Account" asp-action="Register">
+            <i class="fa fa-user-plus"></i> Create Account
+        </a>
+        <a class="btn-cta-outline" asp-controller="Account" asp-action="Login">Sign In</a>
+    </div>
+</div>

@@ -1,0 +1,397 @@
+﻿@model RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+}
+<style>
+    :root {
+        --primary: #1E66D0;
+        --primary-dark: #1757b8;
+        --primary-light: #e8f0fc;
+        --btn-blue: #2F80ED;
+        --bg: #F5F7FA;
+        --bg-white: #ffffff;
+        --text-dark: #333333;
+        --text-mid: #555555;
+        --text-muted: #888888;
+        --border: #e2e8f0;
+        --danger: #dc2626;
+        --danger-light: #fef2f2;
+    }
+
+    body {
+        background: var(--bg) !important;
+    }
+
+    .auth-wrapper {
+        min-height: calc(100vh - 140px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 16px;
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 500px;
+        background: var(--bg-white);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        box-shadow: 0 4px 24px rgba(30,102,208,0.08);
+        overflow: hidden;
+    }
+
+    .auth-card-top {
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--btn-blue));
+    }
+
+    .auth-card-body {
+        padding: 40px 36px;
+    }
+
+    .auth-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        background: var(--primary-light);
+        border: 1px solid rgba(30,102,208,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .auth-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 6px;
+    }
+
+    .auth-subtitle {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-bottom: 28px;
+    }
+
+    .auth-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .auth-input {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        font-size: 14px;
+        font-family: 'DM Sans', sans-serif;
+        color: var(--text-dark);
+        background: var(--bg);
+        transition: all 0.2s;
+        outline: none;
+    }
+
+        .auth-input:focus {
+            border-color: var(--primary);
+            background: var(--bg-white);
+            box-shadow: 0 0 0 3px rgba(30,102,208,0.1);
+        }
+
+        .auth-input::placeholder {
+            color: #b0b8c8;
+        }
+
+    .field-error {
+        font-size: 12px;
+        color: var(--danger);
+        margin-top: 5px;
+        display: block;
+    }
+
+    .validation-summary {
+        background: var(--danger-light);
+        border: 1px solid #fca5a5;
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        color: var(--danger);
+    }
+
+    .field-group {
+        margin-bottom: 18px;
+    }
+
+    /* Two columns for password fields */
+    .fields-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    @@media (max-width: 480px) {
+        .fields-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Password toggle */
+    .input-wrap {
+        position: relative;
+    }
+
+        .input-wrap .auth-input {
+            padding-right: 42px;
+        }
+
+    .pw-toggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0;
+        font-size: 15px;
+    }
+
+        .pw-toggle:hover {
+            color: var(--primary);
+        }
+
+    /* Password strength bar */
+    .pw-strength {
+        margin-top: 6px;
+    }
+
+    .pw-bar {
+        height: 4px;
+        border-radius: 4px;
+        background: var(--border);
+        overflow: hidden;
+        margin-bottom: 4px;
+    }
+
+    .pw-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        width: 0%;
+        transition: width 0.3s, background 0.3s;
+    }
+
+    .pw-hint {
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    /* Submit */
+    .btn-auth {
+        width: 100%;
+        padding: 13px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        background: var(--btn-blue);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        font-family: 'DM Sans', sans-serif;
+        transition: all 0.3s;
+        box-shadow: 0 4px 14px rgba(47,128,237,0.3);
+        margin-top: 6px;
+    }
+
+        .btn-auth:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(47,128,237,0.4);
+        }
+
+    /* Steps badge */
+    .auth-steps {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+    }
+
+    .step-dot {
+        flex: 1;
+        height: 4px;
+        border-radius: 4px;
+        background: var(--primary-light);
+    }
+
+        .step-dot.done {
+            background: var(--primary);
+        }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 22px;
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+        .auth-footer a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+            .auth-footer a:hover {
+                text-decoration: underline;
+            }
+
+    .auth-divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 20px 0;
+        color: var(--text-muted);
+        font-size: 12px;
+    }
+
+        .auth-divider::before, .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+    /* Terms note */
+    .terms-note {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 14px;
+        line-height: 1.5;
+    }
+
+        .terms-note a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+</style>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        @* <div class="auth-card-top"></div> *@
+        <div class="auth-card-body">
+
+            @* <div class="auth-icon">📝</div> *@
+            <h1 class="auth-title">Create your account</h1>
+            <p class="auth-subtitle">Join the Marriage Certificate Portal — it only takes a minute</p>
+
+            <form asp-controller="Account" asp-action="Register" method="post">
+
+                <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+                <!-- Full Name -->
+                <div class="field-group">
+                    <label asp-for="Name" class="auth-label">Full Name</label>
+                    <input asp-for="Name" class="auth-input" placeholder="Enter your full name" />
+                    <span asp-validation-for="Name" class="field-error"></span>
+                </div>
+
+                <!-- Email -->
+                <div class="field-group">
+                    <label asp-for="Email" class="auth-label">Email Address</label>
+                    <input asp-for="Email" class="auth-input" placeholder="you@example.com" autocomplete="email" />
+                    <span asp-validation-for="Email" class="field-error"></span>
+                </div>
+
+                <!-- Password + Confirm (side by side) -->
+                <div class="fields-row">
+                    <div class="field-group">
+                        <label asp-for="Password" class="auth-label">Password</label>
+                        <div class="input-wrap">
+                            <input asp-for="Password" class="auth-input" id="pw-field"
+                                   placeholder="Create password"
+                                   autocomplete="new-password"
+                                   oninput="checkStrength(this.value)" />
+                            <button type="button" class="pw-toggle" onclick="togglePw('pw-field', this)">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="pw-strength">
+                            <div class="pw-bar"><div class="pw-bar-fill" id="pw-bar"></div></div>
+                            <span class="pw-hint" id="pw-hint">Min. 8 characters</span>
+                        </div>
+                        <span asp-validation-for="Password" class="field-error"></span>
+                    </div>
+
+                    <div class="field-group">
+                        <label asp-for="ConfirmPassword" class="auth-label">Confirm Password</label>
+                        <div class="input-wrap">
+                            <input asp-for="ConfirmPassword" class="auth-input" id="cpw-field"
+                                   placeholder="Repeat password"
+                                   autocomplete="new-password" />
+                            <button type="button" class="pw-toggle" onclick="togglePw('cpw-field', this)">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="ConfirmPassword" class="field-error"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-auth">
+                    <i class="fa fa-user-plus" style="margin-right:6px"></i> Create Account
+                </button>
+
+                @* <p class="terms-note">
+                    By registering you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+                </p> *@
+            </form>
+
+            <div class="auth-divider">already have an account?</div>
+
+            <p class="auth-footer">
+                <a asp-action="Login">Sign in instead</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function togglePw(id, btn) {
+            const f = document.getElementById(id);
+            const isText = f.type === 'text';
+            f.type = isText ? 'password' : 'text';
+            btn.innerHTML = isText ? '<i class="fa fa-eye"></i>' : '<i class="fa fa-eye-slash"></i>';
+        }
+
+        function checkStrength(val) {
+            const bar  = document.getElementById('pw-bar');
+            const hint = document.getElementById('pw-hint');
+            let score = 0;
+            if (val.length >= 6)  score++;
+            if (val.length >= 10) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            const levels = [
+                { w: '0%',   c: '#e2e8f0', t: 'Min. 6 characters' },
+                { w: '25%',  c: '#f87171', t: 'Weak' },
+                { w: '50%',  c: '#fb923c', t: 'Fair' },
+                { w: '75%',  c: '#facc15', t: 'Good' },
+                { w: '100%', c: '#22c55e', t: 'Strong ✓' },
+            ];
+            const l = levels[Math.min(score, 4)];
+            bar.style.width      = l.w;
+            bar.style.background = l.c;
+            hint.textContent     = l.t;
+            hint.style.color     = l.c === '#e2e8f0' ? '#888' : l.c;
+        }
+    </script>
+}

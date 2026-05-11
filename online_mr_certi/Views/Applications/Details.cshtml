@@ -1,0 +1,173 @@
+@model online_mr_certi.Models.MarriageApplication
+@using online_mr_certi.Models
+@{
+    ViewData["Title"] = "Application #" + Model.Id;
+    var pay = Model.Payment;
+    var waitingVerification = pay != null &&
+        pay.PaymentStatus == PaymentStatuses.Pending &&
+        !string.IsNullOrEmpty(pay.ReceiptImage);
+    var showPayNow = pay != null &&
+        pay.PaymentStatus != PaymentStatuses.Approved &&
+        !waitingVerification;
+}
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <h2 class="h4">Application #@Model.Id</h2>
+    <div>
+        @if (Model.Status == ApplicationStatus.PendingPayment)
+        { <span class="badge text-bg-secondary">Pending Payment</span> }
+        else if (Model.Status == ApplicationStatus.Pending)
+        { <span class="badge text-bg-warning">Pending review</span> }
+        else if (Model.Status == ApplicationStatus.Approved)
+        { <span class="badge text-bg-success">Approved</span> }
+        else
+        { <span class="badge text-bg-danger">Rejected</span> }
+    </div>
+</div>
+
+@if (TempData["Message"] is string msg)
+{
+    <div class="alert alert-success">@msg</div>
+}
+@if (TempData["Error"] is string err)
+{
+    <div class="alert alert-danger">@err</div>
+}
+
+@if (pay != null)
+{
+    <div class="card shadow-sm mb-3 border-start border-4 @(pay.PaymentStatus == PaymentStatuses.Approved ? "border-success" : pay.PaymentStatus == PaymentStatuses.Rejected ? "border-danger" : "border-warning")">
+        <div class="card-body">
+            <h5 class="card-title">Fee payment</h5>
+            @if (pay.Fee != null)
+            {
+                <p class="mb-1"><strong>Fee:</strong> @pay.Fee.ServiceName</p>
+            }
+            <p class="mb-1"><strong>Amount:</strong> @pay.Amount.ToString("N2") @(pay.Fee?.Currency ?? "")</p>
+            <p class="mb-1"><strong>Payment status:</strong> @pay.PaymentStatus</p>
+            @if (!string.IsNullOrEmpty(pay.SenderPhone))
+            {
+                <p class="mb-1 small"><strong>Sender phone:</strong> @pay.SenderPhone</p>
+            }
+            @if (!string.IsNullOrEmpty(pay.TransactionNumber))
+            {
+                <p class="mb-1 small"><strong>Transaction #:</strong> @pay.TransactionNumber</p>
+            }
+            @if (waitingVerification)
+            {
+                <p class="text-muted small mb-2">Your payment proof was received and is awaiting administrator verification.</p>
+                @if (!string.IsNullOrEmpty(pay.ReceiptImage))
+                {
+                    <p class="mb-0"><a target="_blank" href="~/@pay.ReceiptImage">View uploaded receipt</a></p>
+                }
+            }
+            else if (pay.PaymentStatus == PaymentStatuses.Approved)
+            {
+                <p class="text-success small mb-0">Payment verified. Your application will be reviewed by staff.</p>
+            }
+            else if (pay.PaymentStatus == PaymentStatuses.Rejected)
+            {
+                <p class="text-danger small mb-2">Your payment could not be verified. Please submit new payment details.</p>
+            }
+            @if (showPayNow)
+            {
+                <hr />
+                <a asp-action="Checkout" asp-route-id="@Model.Id" class="btn btn-success">Pay now</a>
+            }
+        </div>
+    </div>
+}
+
+@if (Model.Status == ApplicationStatus.Approved && Model.Certificate != null)
+{
+    <div class="alert alert-success">
+        Your application is approved.
+        <a class="alert-link" asp-action="DownloadCertificate" asp-route-id="@Model.Id">Download marriage certificate (PDF)</a>
+    </div>
+}
+else if (Model.Status == ApplicationStatus.Rejected && !string.IsNullOrEmpty(Model.Remarks))
+{
+    <div class="alert alert-danger">
+        <strong>Remarks:</strong> @Model.Remarks
+    </div>
+}
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">Husband</div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><strong>Name</strong><br />@Model.HusbandName</li>
+                <li class="list-group-item"><strong>Date of birth</strong><br />@Model.HusbandDob.ToString("yyyy-MM-dd")</li>
+                <li class="list-group-item"><strong>ID / Passport</strong><br />@Model.HusbandIdNumber</li>
+                <li class="list-group-item"><strong>Contact</strong><br />@Model.HusbandContactNumber</li>
+                <li class="list-group-item"><strong>Address</strong><br />@Model.HusbandAddress</li>
+            </ul>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">Wife</div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><strong>Name</strong><br />@Model.WifeName</li>
+                <li class="list-group-item"><strong>Date of birth</strong><br />@Model.WifeDob.ToString("yyyy-MM-dd")</li>
+                <li class="list-group-item"><strong>ID / Passport</strong><br />@Model.WifeIdNumber</li>
+                <li class="list-group-item"><strong>Contact</strong><br />@Model.WifeContactNumber</li>
+                <li class="list-group-item"><strong>Address</strong><br />@Model.WifeAddress</li>
+            </ul>
+        </div>
+    </div>
+    @if (Model.Witnesses.Any())
+    {
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">Witnesses (Markhaatiyaal)</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        @foreach (var w in Model.Witnesses.OrderBy(x => x.SortOrder))
+                        {
+                            <div class="col-lg-6">
+                                <h6 class="text-secondary small text-uppercase">Witness @w.SortOrder</h6>
+                                <ul class="list-unstyled small mb-0">
+                                    <li><strong>Name</strong><br />@w.FullName</li>
+                                    <li class="mt-2"><strong>Date of birth</strong><br />@w.DateOfBirth.ToString("yyyy-MM-dd")</li>
+                                    <li class="mt-2"><strong>ID / Passport</strong><br />@w.IdNumber</li>
+                                    <li class="mt-2"><strong>Contact</strong><br />@w.ContactNumber</li>
+                                    <li class="mt-2"><strong>Address</strong><br />@w.Address</li>
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header">Ceremony</div>
+            <div class="card-body">
+                <p class="mb-1"><strong>Date:</strong> @Model.MarriageDate.ToString("yyyy-MM-dd")</p>
+                <p class="mb-0"><strong>Location:</strong> @Model.MarriageLocation</p>
+                <p class="small text-muted mt-2 mb-0">Submitted @Model.SubmissionDate.ToString("yyyy-MM-dd HH:mm") UTC</p>
+            </div>
+        </div>
+    </div>
+    @if (Model.Documents.Any())
+    {
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">Uploaded documents</div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var d in Model.Documents.OrderBy(x => DocumentCategories.SortOrder(x.Category)).ThenBy(x => x.Id))
+                    {
+                        <li class="list-group-item">
+                            <strong>@DocumentCategories.DisplayName(d.Category)</strong>
+                            <span class="text-muted small ms-1">—</span>
+                            <a target="_blank" href="~/@d.FilePath">@System.IO.Path.GetFileName(d.FilePath)</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    }
+</div>
+<p class="mt-3"><a asp-action="Index">← Back to list</a></p>

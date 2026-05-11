@@ -1,0 +1,285 @@
+﻿@model LoginViewModel
+@{
+    ViewData["Title"] = "Sign in";
+}
+<style>
+    :root {
+        --primary: #1E66D0;
+        --primary-dark: #1757b8;
+        --primary-light: #e8f0fc;
+        --btn-blue: #2F80ED;
+        --bg: #F5F7FA;
+        --bg-white: #ffffff;
+        --text-dark: #333333;
+        --text-mid: #555555;
+        --text-muted: #888888;
+        --border: #e2e8f0;
+        --danger: #dc2626;
+        --danger-light: #fef2f2;
+    }
+
+    body {
+        background: var(--bg) !important;
+    }
+
+    .auth-wrapper {
+        min-height: calc(100vh - 140px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 16px;
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 440px;
+        background: var(--bg-white);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        box-shadow: 0 4px 24px rgba(30,102,208,0.08);
+        overflow: hidden;
+    }
+
+    /* Top accent bar */
+    .auth-card-top {
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--btn-blue));
+    }
+
+    .auth-card-body {
+        padding: 40px 36px;
+    }
+
+    /* Icon */
+    .auth-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        background: var(--primary-light);
+        border: 1px solid rgba(30,102,208,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .auth-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 6px;
+    }
+
+    .auth-subtitle {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-bottom: 28px;
+    }
+
+    /* Form labels */
+    .auth-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    /* Inputs */
+    .auth-input {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        font-size: 14px;
+        font-family: 'DM Sans', sans-serif;
+        color: var(--text-dark);
+        background: var(--bg);
+        transition: all 0.2s;
+        outline: none;
+    }
+
+        .auth-input:focus {
+            border-color: var(--primary);
+            background: var(--bg-white);
+            box-shadow: 0 0 0 3px rgba(30,102,208,0.1);
+        }
+
+        .auth-input::placeholder {
+            color: #b0b8c8;
+        }
+
+        .auth-input.input-error {
+            border-color: var(--danger);
+            background: var(--danger-light);
+        }
+
+    .field-error {
+        font-size: 12px;
+        color: var(--danger);
+        margin-top: 5px;
+        display: block;
+    }
+
+    .validation-summary {
+        background: var(--danger-light);
+        border: 1px solid #fca5a5;
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        color: var(--danger);
+    }
+
+    .field-group {
+        margin-bottom: 20px;
+    }
+
+    /* Password toggle wrapper */
+    .input-wrap {
+        position: relative;
+    }
+
+        .input-wrap .auth-input {
+            padding-right: 42px;
+        }
+
+    .pw-toggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0;
+        font-size: 15px;
+    }
+
+        .pw-toggle:hover {
+            color: var(--primary);
+        }
+
+    /* Submit button */
+    .btn-auth {
+        width: 100%;
+        padding: 13px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        background: var(--btn-blue);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        font-family: 'DM Sans', sans-serif;
+        transition: all 0.3s;
+        box-shadow: 0 4px 14px rgba(47,128,237,0.3);
+        margin-top: 4px;
+    }
+
+        .btn-auth:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(47,128,237,0.4);
+        }
+
+    /* Footer text */
+    .auth-footer {
+        text-align: center;
+        margin-top: 22px;
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+        .auth-footer a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+            .auth-footer a:hover {
+                text-decoration: underline;
+            }
+
+    /* Divider */
+    .auth-divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 20px 0;
+        color: var(--text-muted);
+        font-size: 12px;
+    }
+
+        .auth-divider::before, .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+</style>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+       
+        <div class="auth-card-body">
+
+            @* <div class="auth-icon">🔐</div> *@
+            <h1 class="auth-title">Welcome back</h1>
+            <p class="auth-subtitle">Sign in to your account to continue</p>
+
+            <form asp-controller="Account" asp-action="Login" method="post">
+                @if (ViewBag.ReturnUrl != null)
+                {
+                    <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+                }
+
+                <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+                <div class="field-group">
+                    <label asp-for="Email" class="auth-label">Email address</label>
+                    <input asp-for="Email" class="auth-input" placeholder="you@example.com" autocomplete="username" />
+                    <span asp-validation-for="Email" class="field-error"></span>
+                </div>
+
+                <div class="field-group">
+                    <label asp-for="Password" class="auth-label">Password</label>
+                    <div class="input-wrap">
+                        <input asp-for="Password" class="auth-input" id="pw-field"
+                               placeholder="Enter your password"
+                               autocomplete="current-password" />
+                        <button type="button" class="pw-toggle" onclick="togglePw('pw-field', this)">
+                            <i class="fa fa-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="field-error"></span>
+                </div>
+
+                <button type="submit" class="btn-auth">
+                    <i class="fa fa-arrow-right-to-bracket" style="margin-right:6px"></i> Sign in
+                </button>
+            </form>
+
+            <div class="auth-divider">or</div>
+
+            <p class="auth-footer">
+                Don't have an account? <a asp-action="Register">Create one</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function togglePw(id, btn) {
+            const f = document.getElementById(id);
+            const isText = f.type === 'text';
+            f.type = isText ? 'password' : 'text';
+            btn.innerHTML = isText ? '<i class="fa fa-eye"></i>' : '<i class="fa fa-eye-slash"></i>';
+        }
+    </script>
+}

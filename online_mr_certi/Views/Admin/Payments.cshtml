@@ -1,0 +1,99 @@
+@model List<online_mr_certi.Models.Payment>
+@using online_mr_certi.Models
+@{
+    ViewData["Title"] = "Payments";
+    var st = ViewBag.StatusFilter as string;
+}
+<div class="card card-outline card-primary mb-3">
+    <div class="card-body">
+        <form method="get" class="form-inline">
+            <label class="mr-2">Status</label>
+            <select class="form-control form-control-sm mr-2" name="status">
+                <option value="">All</option>
+                @if (st == PaymentStatuses.Pending)
+                {
+                    <option value="@PaymentStatuses.Pending" selected>Pending</option>
+                }
+                else
+                {
+                    <option value="@PaymentStatuses.Pending">Pending</option>
+                }
+                @if (st == PaymentStatuses.Approved)
+                {
+                    <option value="@PaymentStatuses.Approved" selected>Approved</option>
+                }
+                else
+                {
+                    <option value="@PaymentStatuses.Approved">Approved</option>
+                }
+                @if (st == PaymentStatuses.Rejected)
+                {
+                    <option value="@PaymentStatuses.Rejected" selected>Rejected</option>
+                }
+                else
+                {
+                    <option value="@PaymentStatuses.Rejected">Rejected</option>
+                }
+            </select>
+            <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+        </form>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header"><h3 class="card-title">Payments (@Model.Count)</h3></div>
+    <div class="card-body table-responsive p-0">
+        <table class="table table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Applicant</th>
+                    <th>Sender phone</th>
+                    <th>Transaction #</th>
+                    <th>Amount</th>
+                    <th>Receipt</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td>@p.Id</td>
+                        <td>@p.Application.User.Name<br /><small class="text-muted">@p.Application.User.Email</small></td>
+                        <td>@(string.IsNullOrEmpty(p.SenderPhone) ? "—" : p.SenderPhone)</td>
+                        <td style="max-width:140px;word-break:break-all;">@(string.IsNullOrEmpty(p.TransactionNumber) ? "—" : p.TransactionNumber)</td>
+                        <td>@p.Amount.ToString("N2") @(p.Fee?.Currency ?? "")</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(p.ReceiptImage))
+                            {
+                                var ext = System.IO.Path.GetExtension(p.ReceiptImage).ToLowerInvariant();
+                                @if (ext is ".jpg" or ".jpeg" or ".png")
+                                {
+                                    <a asp-action="PaymentDetails" asp-route-id="@p.Id"><img src="~/@p.ReceiptImage" alt="" class="img-thumbnail" style="max-height:56px;max-width:80px;" /></a>
+                                }
+                                else
+                                {
+                                    <a asp-action="PaymentDetails" asp-route-id="@p.Id">File</a>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">—</span>
+                            }
+                        </td>
+                        <td>
+                            @if (p.PaymentStatus == PaymentStatuses.Pending)
+                            { <span class="badge badge-warning">Pending</span> }
+                            else if (p.PaymentStatus == PaymentStatuses.Approved)
+                            { <span class="badge badge-success">Approved</span> }
+                            else
+                            { <span class="badge badge-danger">Rejected</span> }
+                        </td>
+                        <td><a asp-action="PaymentDetails" asp-route-id="@p.Id" class="btn btn-sm btn-default">Review</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,71 @@
+@model online_mr_certi.Models.ViewModels.RoleEditViewModel
+@{
+    ViewData["Title"] = "Create Role";
+}
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="CreateRole" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <label asp-for="Name"></label>
+                <input asp-for="Name" class="form-control" maxlength="100" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-2">
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="perm_select_all" />
+                    <label class="custom-control-label" for="perm_select_all">Select all permissions</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Permissions</label>
+                <div class="row">
+                    @for (var i = 0; i < Model.Permissions.Count; i++)
+                    {
+                        <div class="col-md-4">
+                            <div class="custom-control custom-checkbox">
+                                <input type="hidden" asp-for="Permissions[i].Id" />
+                                <input type="hidden" asp-for="Permissions[i].Name" />
+                                <input asp-for="Permissions[i].Selected" class="custom-control-input perm-item" id="perm_@i" />
+                                <label class="custom-control-label" for="perm_@i">@Model.Permissions[i].Name</label>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Create role</button>
+                <a asp-action="Roles" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const selectAll = document.getElementById('perm_select_all');
+            const items = Array.from(document.querySelectorAll('.perm-item'));
+
+            function syncSelectAll() {
+                selectAll.checked = items.length > 0 && items.every(x => x.checked);
+                selectAll.indeterminate = items.some(x => x.checked) && !selectAll.checked;
+            }
+
+            selectAll.addEventListener('change', function () {
+                items.forEach(x => x.checked = selectAll.checked);
+                syncSelectAll();
+            });
+
+            items.forEach(x => x.addEventListener('change', syncSelectAll));
+            syncSelectAll();
+        })();
+    </script>
+}
+

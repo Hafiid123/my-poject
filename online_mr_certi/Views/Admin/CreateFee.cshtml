@@ -1,0 +1,41 @@
+@model FeeCreateViewModel
+@{
+    ViewData["Title"] = "Create Fee";
+}
+<div class="card card-success card-outline">
+    <div class="card-header"><h3 class="card-title">Create fee</h3></div>
+    <form asp-action="CreateFee" method="post">
+        @Html.AntiForgeryToken()
+        <div class="card-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+            <div class="form-group">
+                <label asp-for="ServiceName"></label>
+                <input asp-for="ServiceName" class="form-control" placeholder="e.g. Marriage Application" />
+                <span asp-validation-for="ServiceName" class="text-danger small"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Amount"></label>
+                <input asp-for="Amount" class="form-control" type="number" step="0.01" min="0" />
+                <span asp-validation-for="Amount" class="text-danger small"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Currency"></label>
+                <input asp-for="Currency" class="form-control" maxlength="10" placeholder="USD" />
+                <span asp-validation-for="Currency" class="text-danger small"></span>
+            </div>
+            <div class="form-group">
+                <div class="custom-control custom-switch">
+                    <input asp-for="IsActive" class="custom-control-input" />
+                    <label asp-for="IsActive" class="custom-control-label"></label>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-success">Create</button>
+            <a asp-action="FeesSettings" class="btn btn-default">Cancel</a>
+        </div>
+    </form>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

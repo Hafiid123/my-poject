@@ -1,0 +1,353 @@
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+    var adminName = HttpContextAccessor.HttpContext?.Session.GetString(SessionKeys.UserName) ?? "Admin";
+    var adminAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var feesMenuActive = adminAction is "FeesSettings" or "EditFee" or "CreateFee" or "DeleteFee";
+    var paymentsMenuActive = adminAction is "Payments" or "PaymentDetails";
+    var rolesMenuActive = adminAction is "Roles" or "CreateRole" or "EditRole";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] — Admin</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <link rel="stylesheet" href="~/AdminLTE/plugins/fontawesome-free/css/all.min.css" />
+    <link rel="icon" type="image/jpeg" href="~/logo.jpg" />
+    <link rel="stylesheet" href="~/AdminLTE/dist/css/adminlte.min.css" />
+    <style>
+        .notification-dropdown { width: 380px; }
+        .notification-scroll { max-height: 420px; overflow-y: auto; }
+        .notification-dropdown .alert-item { background: #fff5f5; }
+        .notification-dropdown .alert-item:hover { background: #ffe3e3; }
+    </style>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+    <div class="wrapper">
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light border-bottom">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                @await Component.InvokeAsync("AdminNotifications")
+                <li class="nav-item d-none d-sm-inline-block">
+                    <span class="nav-link text-muted small"><i class="far fa-user-circle mr-1"></i>@adminName</span>
+                </li>
+                <li class="nav-item">
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline" id="logoutForm">
+                        @Html.AntiForgeryToken()
+                        <button type="submit"
+                                class="btn btn-logout shadow-sm"
+                                onclick="return confirm('Ma hubtaa inaad rabto inaad ka baxdo nidaamka?')">
+                            <i class="fas fa-sign-out-alt mr-1"></i> Sign out
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
+
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <a asp-controller="Admin" asp-action="Index" class="brand-link">
+                <img src="~/logo.jpg" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;" />
+                <span class="brand-text font-weight-light">Marriage System</span>
+            </a>
+            <div class="sidebar">
+                @* <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+            <div class="image">
+                <img src="~/AdminLTE/dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
+            </div>
+            <div class="info">
+                <a href="#" class="d-block"></a>
+                <small class="text-info"><i class="fas fa-circle"></i></small>
+            </div>
+        </div> *@
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+                        <li class="nav-item">
+                            <a asp-controller="Admin" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString()=="Index" && ViewContext.RouteData.Values["controller"]?.ToString()=="Admin" ? "active" : "")">
+                                <i class="nav-icon fas fa-tachometer-alt"></i><p>Dashboard</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="Admin" asp-action="Applications" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString()?.StartsWith("Application") == true ? "active" : "")">
+                                <i class="nav-icon fas fa-file-alt"></i><p>Applications</p>
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a asp-controller="Admin" asp-action="FeesSettings" class="nav-link @(feesMenuActive ? "active" : "")">
+                                <i class="nav-icon fas fa-dollar-sign"></i><p>Fees Settings</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="Admin" asp-action="Payments" class="nav-link @(paymentsMenuActive ? "active" : "")">
+                                <i class="nav-icon fas fa-money-check-alt"></i><p>Payments</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="Admin" asp-action="Reports" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Reports" ? "active" : "")">
+                                <i class="nav-icon fas fa-chart-bar"></i><p>Reports</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="Admin" asp-action="Users" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Users" ? "active" : "")">
+                                <i class="nav-icon fas fa-users"></i><p>Users</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="Admin" asp-action="Roles" class="nav-link @(rolesMenuActive ? "active" : "")">
+                                <i class="nav-icon fas fa-user-shield"></i><p>Roles</p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+
+        <div class="content-wrapper">
+            <div class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1 class="m-0">@ViewData["Title"]</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <section class="content">
+                <div class="container-fluid">
+                    @if (TempData["Message"] is string amsg)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show">
+                            @amsg
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        </div>
+                    }
+                    @if (TempData["Error"] is string err)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            @err
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        </div>
+                    }
+                    @RenderBody()
+                </div>
+            </section>
+        </div>
+
+        <footer class="main-footer text-sm">
+            <strong>Online Marriage Certificate System</strong> — Admin panel
+        </footer>
+    </div>
+
+    <script src="~/AdminLTE/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/AdminLTE/dist/js/adminlte.min.js"></script>
+    <script>
+        (function () {
+            async function refreshBell() {
+                try {
+                    const res = await fetch('/Admin/NotificationBell');
+                    if (!res.ok) return;
+                    const html = await res.text();
+                    const temp = document.createElement('div');
+                    temp.innerHTML = html.trim();
+                    const fresh = temp.firstElementChild;
+                    const current = document.getElementById('admin-notification-wrapper');
+                    if (fresh && current) current.replaceWith(fresh);
+                } catch { }
+            }
+            setInterval(refreshBell, 60000);
+        })();
+    </script>
+    <style>
+        /* Dropdown*/
+        .notification-dropdown {
+            width: 350px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+            border-radius: 12px !important;
+            padding: 0;
+        }
+
+        /* Scroll */
+        .notification-scroll {
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        /* Items  */
+        .notification-dropdown .dropdown-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f8f9fa;
+            transition: all 0.2s;
+        }
+
+            .notification-dropdown .dropdown-item:hover {
+                background-color: #f0f4f8;
+            }
+
+        /* Badge-  Bell */
+        .navbar-badge {
+            font-size: 10px;
+            font-weight: bold;
+            top: 5px !important;
+            right: 4px !important;
+            padding: 2px 5px !important;
+        }
+
+        /* Animation  Bell */
+        .nav-link i.fa-bell {
+            animation: ring 8s .7s ease-in-out infinite;
+            transform-origin: 50% 4px;
+        }
+
+        @@keyframes ring {
+            0% {
+                transform: rotate(0);
+            }
+
+            1% {
+                transform: rotate(30deg);
+            }
+
+            3% {
+                transform: rotate(-28deg);
+            }
+
+            5% {
+                transform: rotate(34deg);
+            }
+
+            7% {
+                transform: rotate(-32deg);
+            }
+
+            9% {
+                transform: rotate(30deg);
+            }
+
+            11% {
+                transform: rotate(-28deg);
+            }
+
+            13% {
+                transform: rotate(26deg);
+            }
+
+            15% {
+                transform: rotate(-24deg);
+            }
+
+            17% {
+                transform: rotate(22deg);
+            }
+
+            19% {
+                transform: rotate(-20deg);
+            }
+
+            21% {
+                transform: rotate(18deg);
+            }
+
+            23% {
+                transform: rotate(-16deg);
+            }
+
+            25% {
+                transform: rotate(14deg);
+            }
+
+            27% {
+                transform: rotate(-12deg);
+            }
+
+            29% {
+                transform: rotate(10deg);
+            }
+
+            31% {
+                transform: rotate(-8deg);
+            }
+
+            33% {
+                transform: rotate(6deg);
+            }
+
+            35% {
+                transform: rotate(-4deg);
+            }
+
+            37% {
+                transform: rotate(2deg);
+            }
+
+            39% {
+                transform: rotate(-1deg);
+            }
+
+            41% {
+                transform: rotate(1deg);
+            }
+
+            43% {
+                transform: rotate(0);
+            }
+
+            100% {
+                transform: rotate(0);
+            }
+        }
+    </style>
+    <style>
+        /* Sidebar selection active color */
+        .sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link.active {
+            background-color: #3f6791 !important; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Brand logo style */
+        .brand-link {
+            border-bottom: 1px solid #4b545c !important;
+        }
+    </style>
+    <style>
+        /* Logout Button Style */
+        .btn-logout {
+            background-color: #f8f9fa;
+            color: #dc3545; 
+            border: 1px solid #ebedef;
+            border-radius: 8px; 
+            padding: 5px 15px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            margin-top: 4px;
+            margin-right: 10px;
+        }
+
+            .btn-logout:hover {
+                background-color: #dc3545; 
+                color: white;
+                border-color: #dc3545;
+                box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2) !important;
+                transform: translateY(-1px); 
+            }
+
+            .btn-logout:active {
+                transform: translateY(0);
+            }
+
+        
+        .nav-item .text-muted.small {
+            line-height: 2.5;
+            font-weight: 500;
+        }
+    </style>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

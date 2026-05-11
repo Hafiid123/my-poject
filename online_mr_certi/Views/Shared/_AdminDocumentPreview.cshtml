@@ -1,0 +1,25 @@
+@model online_mr_certi.Models.Document?
+@if (Model is null)
+{
+    <span class="text-muted">—</span>
+}
+else
+{
+    var ext = System.IO.Path.GetExtension(Model.FilePath).ToLowerInvariant();
+    var isImg = ext is ".jpg" or ".jpeg" or ".png" or ".webp";
+    <div class="d-flex align-items-start flex-wrap gap-2">
+        
+        @if (isImg)
+        {
+            <a target="_blank" href="~/@Model.FilePath" class="d-inline-block border rounded p-1 bg-light">
+                <img src="~/@Model.FilePath" alt="" class="img-fluid" style="max-height:72px;max-width:96px;object-fit:cover;" />
+            </a>
+        }
+        else
+        {
+            <a target="_blank" href="~/@Model.FilePath" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-file-alt"></i> View Document
+            </a>
+        }
+    </div>
+}

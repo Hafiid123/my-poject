@@ -1,0 +1,220 @@
+@model MarriageApplicationCreateViewModel
+@{
+    ViewData["Title"] = "New marriage application";
+}
+<h2 class="h4 mb-3">Marriage application</h2>
+<form asp-action="Create" method="post" enctype="multipart/form-data" class="needs-validation">
+    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header fw-semibold">Husband</div>
+        <div class="card-body row g-3">
+            <div class="col-md-6">
+                <label asp-for="HusbandName" class="form-label"></label>
+                <input asp-for="HusbandName" class="form-control" />
+                <span asp-validation-for="HusbandName" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="HusbandDob" class="form-label"></label>
+                <input asp-for="HusbandDob" class="form-control" type="date" />
+                <span asp-validation-for="HusbandDob" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="HusbandIdNumber" class="form-label"></label>
+                <input asp-for="HusbandIdNumber" class="form-control" />
+                <span asp-validation-for="HusbandIdNumber" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="HusbandContactNumber" class="form-label"></label>
+                <input asp-for="HusbandContactNumber" class="form-control" />
+                <span asp-validation-for="HusbandContactNumber" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="HusbandAddress" class="form-label"></label>
+                <textarea asp-for="HusbandAddress" class="form-control" rows="2"></textarea>
+                <span asp-validation-for="HusbandAddress" class="text-danger small"></span>
+            </div>
+            <div class="col-12"><hr class="my-1 text-muted" /></div>
+            <div class="col-12">
+                <h6 class="text-secondary small text-uppercase mb-2">Husband — uploads</h6>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="HusbandIdentityDocument" class="form-label"></label>
+                <input asp-for="HusbandIdentityDocument" class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" />
+                <span asp-validation-for="HusbandIdentityDocument" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="HusbandPassportPhoto" class="form-label"></label>
+                <input asp-for="HusbandPassportPhoto" class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" />
+                <span asp-validation-for="HusbandPassportPhoto" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+                <div class="form-text">ID/passport: PDF or clear scan. Photo: passport-style. Max 10 MB each.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header fw-semibold">Wife</div>
+        <div class="card-body row g-3">
+            <div class="col-md-6">
+                <label asp-for="WifeName" class="form-label"></label>
+                <input asp-for="WifeName" class="form-control" />
+                <span asp-validation-for="WifeName" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="WifeDob" class="form-label"></label>
+                <input asp-for="WifeDob" class="form-control" type="date" />
+                <span asp-validation-for="WifeDob" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="WifeIdNumber" class="form-label"></label>
+                <input asp-for="WifeIdNumber" class="form-control" />
+                <span asp-validation-for="WifeIdNumber" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="WifeContactNumber" class="form-label"></label>
+                <input asp-for="WifeContactNumber" class="form-control" />
+                <span asp-validation-for="WifeContactNumber" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="WifeAddress" class="form-label"></label>
+                <textarea asp-for="WifeAddress" class="form-control" rows="2"></textarea>
+                <span asp-validation-for="WifeAddress" class="text-danger small"></span>
+            </div>
+            <div class="col-12"><hr class="my-1 text-muted" /></div>
+            <div class="col-12">
+                <h6 class="text-secondary small text-uppercase mb-2">Wife — uploads</h6>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="WifeIdentityDocument" class="form-label"></label>
+                <input asp-for="WifeIdentityDocument" class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" />
+                <span asp-validation-for="WifeIdentityDocument" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="WifePassportPhoto" class="form-label"></label>
+                <input asp-for="WifePassportPhoto" class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" />
+                <span asp-validation-for="WifePassportPhoto" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+                <div class="form-text">ID/passport: PDF or clear scan. Photo: passport-style. Max 10 MB each.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header fw-semibold">Witness 1 (Markhaatiye 1)</div>
+        <div class="card-body row g-3">
+            <div class="col-12">
+                <p class="text-muted small mb-0">Enter this witness’s details, then upload their ID/passport document.</p>
+            </div>
+            <div class="col-12">
+                <label asp-for="Witness1.FullName" class="form-label"></label>
+                <input asp-for="Witness1.FullName" class="form-control" />
+                <span asp-validation-for="Witness1.FullName" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Witness1.DateOfBirth" class="form-label"></label>
+                <input asp-for="Witness1.DateOfBirth" class="form-control" type="date" />
+                <span asp-validation-for="Witness1.DateOfBirth" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Witness1.IdNumber" class="form-label"></label>
+                <input asp-for="Witness1.IdNumber" class="form-control" />
+                <span asp-validation-for="Witness1.IdNumber" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Witness1.ContactNumber" class="form-label"></label>
+                <input asp-for="Witness1.ContactNumber" class="form-control" />
+                <span asp-validation-for="Witness1.ContactNumber" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="Witness1.Address" class="form-label"></label>
+                <textarea asp-for="Witness1.Address" class="form-control" rows="2"></textarea>
+                <span asp-validation-for="Witness1.Address" class="text-danger small"></span>
+            </div>
+            <div class="col-12"><hr class="my-1 text-muted" /></div>
+            <div class="col-12">
+                <h6 class="text-secondary small text-uppercase mb-2">Witness 1 — ID upload</h6>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Witness1IdentityDocument" class="form-label"></label>
+                <input asp-for="Witness1IdentityDocument" class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" />
+                <span asp-validation-for="Witness1IdentityDocument" class="text-danger small"></span>
+                <div class="form-text">PDF or clear photo. Max 10 MB.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header fw-semibold">Witness 2 (Markhaatiye 2)</div>
+        <div class="card-body row g-3">
+            <div class="col-12">
+                <p class="text-muted small mb-0">Second required witness — details and ID/passport upload.</p>
+            </div>
+            <div class="col-12">
+                <label asp-for="Witness2.FullName" class="form-label"></label>
+                <input asp-for="Witness2.FullName" class="form-control" />
+                <span asp-validation-for="Witness2.FullName" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Witness2.DateOfBirth" class="form-label"></label>
+                <input asp-for="Witness2.DateOfBirth" class="form-control" type="date" />
+                <span asp-validation-for="Witness2.DateOfBirth" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Witness2.IdNumber" class="form-label"></label>
+                <input asp-for="Witness2.IdNumber" class="form-control" />
+                <span asp-validation-for="Witness2.IdNumber" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Witness2.ContactNumber" class="form-label"></label>
+                <input asp-for="Witness2.ContactNumber" class="form-control" />
+                <span asp-validation-for="Witness2.ContactNumber" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="Witness2.Address" class="form-label"></label>
+                <textarea asp-for="Witness2.Address" class="form-control" rows="2"></textarea>
+                <span asp-validation-for="Witness2.Address" class="text-danger small"></span>
+            </div>
+            <div class="col-12"><hr class="my-1 text-muted" /></div>
+            <div class="col-12">
+                <h6 class="text-secondary small text-uppercase mb-2">Witness 2 — ID upload</h6>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Witness2IdentityDocument" class="form-label"></label>
+                <input asp-for="Witness2IdentityDocument" class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" />
+                <span asp-validation-for="Witness2IdentityDocument" class="text-danger small"></span>
+                <div class="form-text">PDF or clear photo. Max 10 MB.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header fw-semibold">Marriage</div>
+        <div class="card-body row g-3">
+            <div class="col-md-6">
+                <label asp-for="MarriageDate" class="form-label"></label>
+                <input asp-for="MarriageDate" class="form-control" type="date" />
+                <span asp-validation-for="MarriageDate" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="MarriageLocation" class="form-label"></label>
+                <input asp-for="MarriageLocation" class="form-control" />
+                <span asp-validation-for="MarriageLocation" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="UploadedFiles" class="form-label"></label>
+                <input asp-for="UploadedFiles" class="form-control" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp" />
+                <span asp-validation-for="UploadedFiles" class="text-danger small"></span>
+                <div class="form-text">Optional additional supporting documents. PDF or images, up to 10 MB each.</div>
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit application</button>
+    <a class="btn btn-link" asp-action="Index">Cancel</a>
+</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

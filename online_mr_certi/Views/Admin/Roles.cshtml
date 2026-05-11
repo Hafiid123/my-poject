@@ -1,0 +1,44 @@
+@model List<online_mr_certi.Models.Role>
+@{
+    ViewData["Title"] = "Roles";
+}
+
+<div class="d-flex justify-content-end mb-2 px-2">
+    <a asp-action="CreateRole" class="btn btn-primary me-5">
+        <i class="fas fa-plus"></i> Create role
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">All roles</h3>
+    </div>
+    <div class="card-body table-responsive p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Role name</th>
+                    <th>Created</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model)
+                {
+                    <tr>
+                        <td>@r.Id</td>
+                        <td>@r.Name</td>
+                        <td>@r.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>
+                            <a asp-action="EditRole" asp-route-id="@r.Id" class="btn btn-sm btn-info" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

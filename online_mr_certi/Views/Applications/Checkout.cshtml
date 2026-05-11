@@ -1,0 +1,71 @@
+@model online_mr_certi.Models.ViewModels.PaymentCheckoutViewModel
+@{
+    ViewData["Title"] = "Payment checkout";
+}
+<h2 class="h4 mb-3">Payment checkout</h2>
+<p class="text-muted small">Application #@Model.ApplicationId</p>
+
+<div class="card shadow-sm mb-3">
+    <div class="card-header fw-semibold">Payment details</div>
+    <div class="card-body">
+        <p class="mb-1"><strong>Fee:</strong> @Model.FeeName</p>
+        <p class="mb-0"><strong>Amount:</strong> @Model.Amount.ToString("N2") @Model.Currency</p>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-3 border-primary border-2">
+    <div class="card-header bg-primary text-white fw-semibold">Payment instructions</div>
+    <div class="card-body">
+        <p class="mb-2"><strong>Send to this number:</strong></p>
+        <p class="fs-4 mb-3"><span class="badge bg-dark">@Model.MobileMoneyNumber</span></p>
+        <ol class="mb-0 ps-3">
+            <li>Open <strong>EVC Plus</strong>, <strong>ZAAD</strong>, or your mobile money app.</li>
+            <li>Send the <strong>exact amount</strong> shown above to the number displayed.</li>
+            <li>*712*61XXXXXX</li>
+            <li>Keep the receipt screenshot or photo — you will upload it below.</li>
+        </ol>
+    </div>
+</div>
+
+<div class="alert alert-warning">
+    <strong>Important:</strong> Enter your transaction details carefully. Your payment will be verified by an administrator before your application proceeds.
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header fw-semibold">Submit payment proof</div>
+    <div class="card-body">
+        <form asp-action="Checkout" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="ApplicationId" />
+            <input type="hidden" asp-for="FeeName" />
+            <input type="hidden" asp-for="Amount" />
+            <input type="hidden" asp-for="Currency" />
+            <input type="hidden" asp-for="MobileMoneyNumber" />
+
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+            <div class="mb-3">
+                <label asp-for="SenderPhone" class="form-label"></label>
+                <input asp-for="SenderPhone" class="form-control" autocomplete="tel" placeholder="Phone used to send payment" />
+                <span asp-validation-for="SenderPhone" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="TransactionNumber" class="form-label"></label>
+                <input asp-for="TransactionNumber" class="form-control" placeholder="Reference / transaction ID from SMS or receipt" />
+                <span asp-validation-for="TransactionNumber" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ReceiptImage" class="form-label"></label>
+                <input asp-for="ReceiptImage" class="form-control" accept=".jpg,.jpeg,.png,image/jpeg,image/png" />
+                <span asp-validation-for="ReceiptImage" class="text-danger small"></span>
+                <div class="form-text">JPG, JPEG, or PNG only (max 10 MB).</div>
+            </div>
+            <button type="submit" class="btn btn-success">Submit payment proof</button>
+            <a asp-action="Details" asp-route-id="@Model.ApplicationId" class="btn btn-outline-secondary ms-2">Cancel</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

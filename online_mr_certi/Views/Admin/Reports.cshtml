@@ -1,0 +1,84 @@
+@model ReportsViewModel
+@{
+    ViewData["Title"] = "Reports";
+}
+
+    
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Submissions by month (last 12)</h3></div>
+            <div class="card-body table-responsive p-0">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th>Total</th>
+                            <th>Pending</th>
+                            <th>Approved</th>
+                            <th>Rejected</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.ByMonth)
+                        {
+                            <tr>
+                                <td>@row.Period</td>
+                                <td>@row.Total</td>
+                                <td>@row.Pending</td>
+                                <td>@row.Approved</td>
+                                <td>@row.Rejected</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    
+   @* <div class="col-lg-6">
+        <div class="card card-outline card-info">
+            <div class="card-header"><h3 class="card-title">Summary</h3></div>
+            <div class="card-body">
+                @{
+                    var t = Model.ByMonth.Sum(x => x.Total);
+                    var p = Model.ByMonth.Sum(x => x.Pending);
+                    var appr = Model.ByMonth.Sum(x => x.Approved);
+                    var r = Model.ByMonth.Sum(x => x.Rejected);
+                }
+                <p>Rows above cover the displayed months only. Totals in table: <strong>@t</strong> applications.</p>
+                <p class="mb-0 small text-muted">Pending @p · Approved @appr · Rejected @r</p>
+            </div>
+        </div>
+    </div>
+*@
+
+
+@*<div class="card mt-3">
+    <div class="card-header"><h3 class="card-title">Recent applications </h3></div>
+    <div class="card-body table-responsive p-0">
+        <table class="table table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Applicant</th>
+                    <th>Parties</th>
+                    <th>Status</th>
+                    <th>Submitted</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in Model.RecentApplications)
+                {
+                    <tr>
+                        <td>@a.Id</td>
+                        <td>@a.ApplicantEmail</td>
+                        <td>@a.HusbandName &amp; @a.WifeName</td>
+                        <td>@a.Status</td>
+                        <td>@a.SubmissionDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td><a asp-action="ApplicationDetails" asp-route-id="@a.Id">Open</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+*@

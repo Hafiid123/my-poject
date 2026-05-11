@@ -1,0 +1,61 @@
+﻿@model online_mr_certi.Models.User
+@{
+    ViewData["Title"] = "User Profile";
+}
+
+<div class="row mb-3">
+    <div class="col-md-8">
+        
+    </div>
+    <div class="col-md-4 text-md-right text-right">
+        @if (Model.Role == "Admin")
+        {
+            <span class="badge badge-danger badge-lg">Administrator</span>
+        }
+        else
+        {
+            <span class="badge badge-info badge-lg">Regular User</span>
+        }
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h3 class="card-title">Account Information</h3>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Full Name</dt>
+                    <dd class="col-sm-9">@Model.Name</dd>
+
+                    <dt class="col-sm-3">Email Address</dt>
+                    <dd class="col-sm-9">@Model.Email</dd>
+
+                    <dt class="col-sm-3">Account Role</dt>
+                    <dd class="col-sm-9">@Model.Role</dd>
+
+                   
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card card-outline card-secondary">
+    <div class="card-header">
+        @* <h3 class="card-title">Actions</h3> *@
+    </div>
+    <div class="card-body">
+        @* <a asp-action="EditUser" asp-route-id="@Model.Id" class="btn btn-info">
+            <i class="fas fa-edit"></i> Edit User Profile
+        </a> *@
+
+        @* <a asp-action="DeleteUser" asp-route-id="@Model.Id" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Delete Account
+        </a> *@
+
+        <a asp-action="Users" class="btn btn-default ml-2">Back to List</a>
+    </div>
+</div>

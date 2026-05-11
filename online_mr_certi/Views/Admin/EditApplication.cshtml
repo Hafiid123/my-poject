@@ -1,0 +1,110 @@
+@model AdminApplicationEditViewModel
+@using online_mr_certi.Models
+@{
+    ViewData["Title"] = "Edit Application";
+}
+
+<form asp-action="EditApplication" method="post">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+    <div class="card card-primary card-outline">
+        <div class="card-header"><h3 class="card-title">Edit application #@Model.Id</h3></div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label asp-for="HusbandName"></label>
+                    <input asp-for="HusbandName" class="form-control" />
+                    <span asp-validation-for="HusbandName" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label asp-for="HusbandDob"></label>
+                    <input asp-for="HusbandDob" class="form-control" type="date" />
+                    <span asp-validation-for="HusbandDob" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label asp-for="HusbandIdNumber"></label>
+                    <input asp-for="HusbandIdNumber" class="form-control" />
+                    <span asp-validation-for="HusbandIdNumber" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label asp-for="HusbandContactNumber"></label>
+                    <input asp-for="HusbandContactNumber" class="form-control" />
+                    <span asp-validation-for="HusbandContactNumber" class="text-danger small"></span>
+                </div>
+                <div class="col-12 form-group">
+                    <label asp-for="HusbandAddress"></label>
+                    <textarea asp-for="HusbandAddress" class="form-control" rows="2"></textarea>
+                    <span asp-validation-for="HusbandAddress" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <hr />
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label asp-for="WifeName"></label>
+                    <input asp-for="WifeName" class="form-control" />
+                    <span asp-validation-for="WifeName" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label asp-for="WifeDob"></label>
+                    <input asp-for="WifeDob" class="form-control" type="date" />
+                    <span asp-validation-for="WifeDob" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label asp-for="WifeIdNumber"></label>
+                    <input asp-for="WifeIdNumber" class="form-control" />
+                    <span asp-validation-for="WifeIdNumber" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label asp-for="WifeContactNumber"></label>
+                    <input asp-for="WifeContactNumber" class="form-control" />
+                    <span asp-validation-for="WifeContactNumber" class="text-danger small"></span>
+                </div>
+                <div class="col-12 form-group">
+                    <label asp-for="WifeAddress"></label>
+                    <textarea asp-for="WifeAddress" class="form-control" rows="2"></textarea>
+                    <span asp-validation-for="WifeAddress" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <hr />
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    <label asp-for="MarriageDate"></label>
+                    <input asp-for="MarriageDate" class="form-control" type="date" />
+                    <span asp-validation-for="MarriageDate" class="text-danger small"></span>
+                </div>
+                <div class="col-md-4 form-group">
+                    <label asp-for="MarriageLocation"></label>
+                    <input asp-for="MarriageLocation" class="form-control" />
+                    <span asp-validation-for="MarriageLocation" class="text-danger small"></span>
+                </div>
+                <div class="col-md-4 form-group">
+                    <label asp-for="Status"></label>
+                    <select asp-for="Status" class="form-control">
+                        <option value="@ApplicationStatus.PendingPayment">Pending Payment</option>
+                        <option value="@ApplicationStatus.Pending">Pending</option>
+                        <option value="@ApplicationStatus.Approved">Approved</option>
+                        <option value="@ApplicationStatus.Rejected">Rejected</option>
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger small"></span>
+                </div>
+                <div class="col-12 form-group">
+                    <label asp-for="Remarks"></label>
+                    <textarea asp-for="Remarks" class="form-control" rows="2"></textarea>
+                    <span asp-validation-for="Remarks" class="text-danger small"></span>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Save changes</button>
+            <a asp-action="ApplicationDetails" asp-route-id="@Model.Id" class="btn btn-default">Cancel</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

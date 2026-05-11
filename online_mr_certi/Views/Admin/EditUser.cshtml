@@ -1,0 +1,41 @@
+@model AdminUserEditViewModel
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="card card-primary card-outline">
+    <div class="card-header"><h3 class="card-title">Edit user #@Model.Id</h3></div>
+    <form asp-action="EditUser" method="post">
+        @Html.AntiForgeryToken()
+        <input asp-for="Id" type="hidden" />
+        <div class="card-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+            <div class="form-group">
+                <label asp-for="Name"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Email"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Role"></label>
+                <select asp-for="Role" class="form-control">
+                    <option value="@AppRoles.User">User</option>
+                    <option value="@AppRoles.Admin">Admin</option>
+                </select>
+                <span asp-validation-for="Role" class="text-danger small"></span>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Save changes</button>
+            <a asp-action="Users" class="btn btn-default">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

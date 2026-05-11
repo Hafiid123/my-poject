@@ -1,0 +1,12 @@
+-- Optional: insert an administrator without using SeedAdmin in appsettings.
+-- The password column must store a BCrypt hash (same algorithm as BCrypt.Net-Next used by the app).
+-- Example: hash the plain password in C# with BCrypt.Net.BCrypt.HashPassword("YourPassword")
+-- and paste the result below.
+
+-- INSERT INTO users (name, email, password, role)
+-- VALUES (
+--   'Administrator',
+--   'admin@example.com',
+--   '$2a$11$YOUR_BCRYPT_HASH_HERE',
+--   'Admin'
+-- );

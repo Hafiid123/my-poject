@@ -1,0 +1,74 @@
+@model online_mr_certi.Models.ViewModels.AdminNotificationsViewModel
+@{
+    static string TimeAgo(DateTime utc)
+    {
+        var span = DateTime.UtcNow - utc;
+        if (span.TotalMinutes < 1) return "just now";
+        if (span.TotalHours < 1) return $"{(int)span.TotalMinutes} min ago";
+        if (span.TotalDays < 1) return $"{(int)span.TotalHours} hr ago";
+        return $"{(int)span.TotalDays} day ago";
+    }
+}
+<li class="nav-item dropdown" id="admin-notification-wrapper">
+    <a class="nav-link" data-toggle="dropdown" href="#" aria-label="Notifications">
+        <i class="far fa-bell"></i>
+        @if (Model.UnreadCount > 0)
+        {
+            <span class="badge badge-danger navbar-badge">@Model.UnreadCount</span>
+        }
+    </a>
+    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right p-0 notification-dropdown">
+        <div class="dropdown-header d-flex justify-content-between align-items-center">
+            <span>Notifications</span>
+            <form asp-controller="Admin" asp-action="MarkNotificationsRead" method="post" class="mb-0">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-link btn-sm p-0">Mark all as read</button>
+            </form>
+        </div>
+        <div class="notification-scroll">
+            <div class="px-3 pt-2 pb-1 text-uppercase text-muted small font-weight-bold">Alerts</div>
+            @if (Model.Alerts.Count == 0)
+            {
+                <div class="dropdown-item text-muted small">No active alerts</div>
+            }
+            else
+            {
+                @foreach (var alert in Model.Alerts)
+                {
+                    <a href="@alert.Url" class="dropdown-item alert-item">
+                        <div class="d-flex">
+                            <div class="mr-2"><i class="@alert.IconClass"></i></div>
+                            <div class="flex-grow-1">
+                                <div class="small font-weight-bold text-danger">@alert.Message</div>
+                                <div class="small text-muted">@TimeAgo(alert.CreatedAt)</div>
+                            </div>
+                        </div>
+                    </a>
+                }
+            }
+
+            <div class="dropdown-divider"></div>
+            <div class="px-3 pt-2 pb-1 text-uppercase text-muted small font-weight-bold">Recent Activity</div>
+            @if (Model.Notifications.Count == 0)
+            {
+                <div class="dropdown-item text-muted small">No recent activities</div>
+            }
+            else
+            {
+                @foreach (var note in Model.Notifications)
+                {
+                    <a href="@note.Url" class="dropdown-item">
+                        <div class="d-flex">
+                            <div class="mr-2"><i class="@note.IconClass"></i></div>
+                            <div class="flex-grow-1">
+                                <div class="small">@note.Message</div>
+                                <div class="small text-muted">@TimeAgo(note.CreatedAt)</div>
+                            </div>
+                        </div>
+                    </a>
+                }
+            }
+        </div>
+    </div>
+</li>
+

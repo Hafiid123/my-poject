@@ -1,0 +1,79 @@
+@model online_mr_certi.Models.Payment
+@using online_mr_certi.Models
+@{
+    ViewData["Title"] = "Payment #" + Model.Id;
+    var app = Model.Application;
+}
+<div class="row mb-3">
+    <div class="col-md-8">
+        
+        <p class="text-muted mb-0">Application #@app.Id — @app.User.Name </p>
+        <p class="text-muted small mb-0">User payment flag: <strong>@app.User.PaymentStatus</strong></p>
+    </div>
+    <div class="col-md-4 text-md-right">
+        @if (Model.PaymentStatus == PaymentStatuses.Pending)
+        { <span class="badge badge-warning badge-lg">Pending</span> }
+        else if (Model.PaymentStatus == PaymentStatuses.Approved)
+        { <span class="badge badge-success badge-lg">Approved</span> }
+        else
+        { <span class="badge badge-danger badge-lg">Rejected</span> }
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header"><h3 class="card-title">Payment details</h3></div>
+    <div class="card-body">
+        @if (Model.Fee != null)
+        {
+            <p><strong>Fee:</strong> @Model.Fee.ServiceName</p>
+        }
+        <p><strong>Amount:</strong> @Model.Amount.ToString("N2") @(Model.Fee?.Currency ?? "")</p>
+        <p><strong>Sender phone:</strong> @(string.IsNullOrEmpty(Model.SenderPhone) ? "—" : Model.SenderPhone)</p>
+        <p><strong>Transaction number:</strong> @(string.IsNullOrEmpty(Model.TransactionNumber) ? "—" : Model.TransactionNumber)</p>
+        <p><strong>Submitted:</strong> @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm") UTC</p>
+        <p><strong>Verified / updated:</strong> @(Model.PaymentDate?.ToString("yyyy-MM-dd HH:mm") ?? "—") UTC</p>
+        @if (!string.IsNullOrEmpty(Model.ReceiptImage))
+        {
+            var ext = System.IO.Path.GetExtension(Model.ReceiptImage).ToLowerInvariant();
+            <p><strong>Receipt:</strong> <a target="_blank" href="~/@Model.ReceiptImage">Open file</a></p>
+            @if (ext is ".jpg" or ".jpeg" or ".png" or ".webp")
+            {
+                <p class="mb-0"><img src="~/@Model.ReceiptImage" alt="Receipt" class="img-fluid img-thumbnail" style="max-height: 420px;" /></p>
+            }
+        }
+        else
+        {
+            <p class="text-muted mb-0">No receipt uploaded yet.</p>
+        }
+    </div>
+</div>
+
+<div class="card card-outline card-secondary">
+    <div class="card-header"><h3 class="card-title">Verification</h3></div>
+    <div class="card-body">
+        @if (Model.PaymentStatus == PaymentStatuses.Pending && !string.IsNullOrEmpty(Model.ReceiptImage))
+        {
+            <form asp-action="ApprovePayment" method="post" class="d-inline mr-2">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button type="submit" class="btn btn-success" onclick="return confirm('Approve this payment?');">Approve payment</button>
+            </form>
+            <form asp-action="RejectPayment" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Reject this payment?');">Reject payment</button>
+            </form>
+        }
+        else if (Model.PaymentStatus == PaymentStatuses.Pending && string.IsNullOrEmpty(Model.ReceiptImage))
+        {
+            <p class="text-muted mb-0">Waiting for the applicant to submit payment proof on the checkout page.</p>
+        }
+        else
+        {
+            <p class="text-muted mb-0">This payment record is finalized.</p>
+        }
+        <hr />
+        <a asp-action="ApplicationDetails" asp-route-id="@app.Id" class="btn btn-info">Open application</a>
+        <a asp-action="Payments" class="btn btn-default">Back to payments</a>
+    </div>
+</div>
