@@ -7,4 +7,5 @@ public static class SessionKeys
     public const string UserEmail = "UserEmail";
     public const string Role = "Role";
     public const string RoleId = "RoleId";
+    public const string Permissions = "Permissions";
 }

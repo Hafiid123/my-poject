@@ -1,84 +1,197 @@
 @model ReportsViewModel
+@using online_mr_certi.Models
 @{
     ViewData["Title"] = "Reports";
 }
 
-    
-        <div class="card">
-            <div class="card-header"><h3 class="card-title">Submissions by month (last 12)</h3></div>
-            <div class="card-body table-responsive p-0">
-                <table class="table table-sm mb-0">
-                    <thead>
-                        <tr>
-                            <th>Period</th>
-                            <th>Total</th>
-                            <th>Pending</th>
-                            <th>Approved</th>
-                            <th>Rejected</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var row in Model.ByMonth)
-                        {
-                            <tr>
-                                <td>@row.Period</td>
-                                <td>@row.Total</td>
-                                <td>@row.Pending</td>
-                                <td>@row.Approved</td>
-                                <td>@row.Rejected</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+
+<div class="card card-outline card-primary mb-3">
+    <div class="card-body">
+        <form method="get" class="form-row align-items-end">
+            <div class="form-group col-md-4">
+                <label>Search</label>
+                <input class="form-control" id="searchBox" placeholder="Name, status, ref..." />
             </div>
-        </div>
-    
-   @* <div class="col-lg-6">
-        <div class="card card-outline card-info">
-            <div class="card-header"><h3 class="card-title">Summary</h3></div>
-            <div class="card-body">
-                @{
-                    var t = Model.ByMonth.Sum(x => x.Total);
-                    var p = Model.ByMonth.Sum(x => x.Pending);
-                    var appr = Model.ByMonth.Sum(x => x.Approved);
-                    var r = Model.ByMonth.Sum(x => x.Rejected);
-                }
-                <p>Rows above cover the displayed months only. Totals in table: <strong>@t</strong> applications.</p>
-                <p class="mb-0 small text-muted">Pending @p · Approved @appr · Rejected @r</p>
+            <div class="form-group col-md-3">
+                <label>Status</label>
+                <select class="form-control" id="statusFilter">
+                    <option value="">All</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
             </div>
+            <div class="form-group col-md-2">
+                <label>Show</label>
+                <select class="form-control" id="perPage">
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="9999">All</option>
+                </select>
+            </div>
+            <div class="form-group col-md-2">
+                <button type="button" class="btn btn-primary btn-block" onclick="renderTable()">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Marriage Applications Report (<span id="totalCount">0</span>)</h3>
+        <div class="d-flex justify-content-end mb-2 px-2">
+            <button type="button" class="btn btn-info mr-2" onclick="printReport()">
+                <i class="fas fa-print"></i> Print All
+            </button>
+            <a href="@Url.Action("ReportsCsv","Admin")" class="btn btn-success me-5">
+                <i class="fas fa-download"></i> Download CSV
+            </a>
+
         </div>
     </div>
-*@
 
-
-@*<div class="card mt-3">
-    <div class="card-header"><h3 class="card-title">Recent applications </h3></div>
     <div class="card-body table-responsive p-0">
         <table class="table table-striped mb-0">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Applicant</th>
-                    <th>Parties</th>
-                    <th>Status</th>
-                    <th>Submitted</th>
-                    <th></th>
+                    <th style="cursor:pointer;" >#</th>
+                    <th style="cursor:pointer;" >Ref No</th>
+                    <th style="cursor:pointer;" >Husband</th>
+                    <th style="cursor:pointer;" >Wife</th>
+                    <th style="cursor:pointer;" >Amount</th>
+                    <th style="cursor:pointer;" >Payment</th>
+                    <th style="cursor:pointer;" >Status</th>
+                    <th style="cursor:pointer;" >Date</th>
+                    <th style="cursor:pointer;" >Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                @foreach (var a in Model.RecentApplications)
-                {
-                    <tr>
-                        <td>@a.Id</td>
-                        <td>@a.ApplicantEmail</td>
-                        <td>@a.HusbandName &amp; @a.WifeName</td>
-                        <td>@a.Status</td>
-                        <td>@a.SubmissionDate.ToString("yyyy-MM-dd HH:mm")</td>
-                        <td><a asp-action="ApplicationDetails" asp-route-id="@a.Id">Open</a></td>
-                    </tr>
-                }
+            <tbody id="tBody">
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">Loading...</td>
+                 
+                </tr>
             </tbody>
         </table>
     </div>
+
+    
+    <div class="card-footer clearfix">
+        <span id="infoText" class="float-left text-muted" style="font-size:13px;"></span>
+        <ul class="pagination pagination-sm m-0 float-right" id="pageNums"></ul>
+    </div>
 </div>
-*@
+
+<script>
+const RAW = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Rows.Select(r => new {
+    i    = r.Id,
+    ref_ = r.RefNo,
+    hus  = r.Husband,
+    wife = r.Wife,
+    amt  = r.Amount,
+    pay  = r.Payment,
+    sta  = r.Status,
+    dat  = r.Date.ToString("yyyy-MM-dd")
+
+})));
+
+let filtered = [...RAW];
+let page     = 1;
+let sortKey  = '';
+let sortAsc  = true;
+
+function statusBadge(s) {
+    if (s === 'Approved') return '<span class="badge badge-success">Approved</span>';
+    if (s === 'Rejected') return '<span class="badge badge-danger">Rejected</span>';
+    if (s === 'Pending')  return '<span class="badge badge-warning">Pending</span>';
+    return `<span class="badge badge-secondary">${s}</span>`;
+}
+
+function payBadge(p) {
+    if (p === 'Approved') return '<span class="badge badge-primary">Paid</span>';
+    return '<span class="badge badge-secondary">Unpaid</span>';
+}
+
+function renderTable() {
+    const q   = document.getElementById('searchBox').value.toLowerCase();
+    const st  = document.getElementById('statusFilter').value.toLowerCase();
+    const pp  = parseInt(document.getElementById('perPage').value);
+
+    filtered = RAW.filter(r => {
+        const matchQ  = !q  || r.ref_.toLowerCase().includes(q) ||
+                               r.hus.toLowerCase().includes(q)  ||
+                               r.wife.toLowerCase().includes(q) ||
+                               r.sta.toLowerCase().includes(q)  ||
+                               r.pay.toLowerCase().includes(q);
+        const matchSt = !st || r.sta.toLowerCase() === st;
+        return matchQ && matchSt;
+    });
+
+    if (sortKey) {
+    filtered.sort((a, b) => {
+        let av = a[sortKey], bv = b[sortKey];
+        if (typeof av === 'number' && typeof bv === 'number') {
+            return sortAsc ? av - bv : bv - av;
+        }
+        av = String(av).toLowerCase();
+        bv = String(bv).toLowerCase();
+        return sortAsc ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1);
+    });
+}
+
+    const total = filtered.length;
+    document.getElementById('totalCount').textContent = total;
+
+    const pages = Math.max(1, Math.ceil(total / pp));
+    if (page > pages) page = 1;
+
+    const start = (page - 1) * pp;
+    const slice = filtered.slice(start, start + pp);
+
+    document.getElementById('tBody').innerHTML = slice.length === 0
+        ? '<tr><td colspan="8" class="text-center text-muted py-4">No entries found</td></tr>'
+        : slice.map((r, idx) => `<tr>
+            <td>${start + idx + 1}</td>
+            <td><code>${r.ref_}</code></td>
+            <td>${r.hus}</td>
+            <td>${r.wife}</td>
+            <td>$${parseFloat(r.amt).toFixed(2)}</td>
+            <td>${payBadge(r.pay)}</td>
+            <td>${statusBadge(r.sta)}</td>
+            <td>${r.dat}</td>
+          </tr>`).join('');
+
+    const end = Math.min(start + pp, total);
+    document.getElementById('infoText').textContent = total === 0
+        ? 'No entries found'
+        : `Showing ${start + 1} to ${end} of ${total} entries`;
+
+    let nums = `<li class="page-item${page===1?' disabled':''}">
+                  <a class="page-link" href="#" onclick="prevPage();return false;">«</a>
+                </li>`;
+    for (let p = 1; p <= pages; p++) {
+        nums += `<li class="page-item${p===page?' active':''}">
+                   <a class="page-link" href="#" onclick="goPage(${p});return false;">${p}</a>
+                 </li>`;
+    }
+    nums += `<li class="page-item${page===pages?' disabled':''}">
+               <a class="page-link" href="#" onclick="nextPage();return false;">»</a>
+             </li>`;
+    document.getElementById('pageNums').innerHTML = nums;
+}
+
+function sortBy(key) {
+    if (sortKey === key) sortAsc = !sortAsc; else { sortKey = key; sortAsc = true; }
+    page = 1; renderTable();
+}
+function prevPage() { if (page > 1) { page--; renderTable(); } }
+function nextPage()  { page++; renderTable(); }
+function goPage(p)   { page = p; renderTable(); }
+
+document.getElementById('searchBox').addEventListener('input', () => { page=1; renderTable(); });
+document.getElementById('statusFilter').addEventListener('change', () => { page=1; renderTable(); });
+document.getElementById('perPage').addEventListener('change', () => { page=1; renderTable(); });
+
+renderTable();
+</script>

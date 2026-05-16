@@ -25,7 +25,17 @@ public class AdminDashboardViewModel
     public List<AdminDashboardApplicationRow> FilteredApplications { get; set; } = new();
 
     public List<ActivityItemViewModel> RecentActivities { get; set; } = new();
+
+
+    // ===== Payment Chart =====
+    public List<string> PaymentTrendLabels { get; set; } = new();
+    public List<int> PaymentTrendValues { get; set; } = new();
+    public int TotalPaidPayments { get; set; }
+    public int TotalPendingPayments { get; set; }
+    public decimal TotalRevenue { get; set; }
 }
+
+
 
 public class AdminDashboardApplicationRow
 {

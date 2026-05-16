@@ -47,6 +47,24 @@ public class AdminController : Controller
             .Select(i => startDate.AddDays(i))
             .ToList();
 
+        // ===== Payment Trend (Last 7 Days) =====
+        var paymentTrendRaw = await _db.Payments
+            .AsNoTracking()
+            .Where(p => p.PaymentStatus == PaymentStatuses.Approved &&
+                        p.PaymentDate != null &&
+                        p.PaymentDate.Value >= startDate)
+            .GroupBy(p => p.PaymentDate!.Value.Date)
+            .Select(g => new { Day = g.Key, Count = g.Count() })
+            .ToListAsync();
+
+        var paymentTrendMap = paymentTrendRaw.ToDictionary(x => x.Day, x => x.Count);
+
+        var totalPaid = await _db.Payments.CountAsync(p => p.PaymentStatus == PaymentStatuses.Approved);
+        var totalPendingPay = await _db.Payments.CountAsync(p => p.PaymentStatus == PaymentStatuses.Pending);
+        var totalRevenue = await _db.Payments
+            .Where(p => p.PaymentStatus == PaymentStatuses.Approved)
+            .SumAsync(p => (decimal?)p.Amount) ?? 0m;
+
         var decidedApps = await allApps
             .Where(a => a.DecisionDate != null &&
                         (a.Status == ApplicationStatus.Approved || a.Status == ApplicationStatus.Rejected))
@@ -151,7 +169,14 @@ public class AdminController : Controller
             SearchQuery = q,
             StatusFilter = status,
             FilteredApplications = filtered,
-            RecentActivities = activities
+            RecentActivities = activities,
+
+            // ===== Payment Chart =====
+            PaymentTrendLabels = trendLabels.Select(d => d.ToString("ddd")).ToList(),
+            PaymentTrendValues = trendLabels.Select(d => paymentTrendMap.TryGetValue(d, out var c) ? c : 0).ToList(),
+            TotalPaidPayments = totalPaid,
+            TotalPendingPayments = totalPendingPay,
+            TotalRevenue = totalRevenue,
         };
 
         return View(vm);
@@ -259,8 +284,6 @@ public class AdminController : Controller
             return View(model);
         }
 
-        // Keep existing string-role behavior: only the real system admin uses Role="Admin".
-        // Other staff roles still get RoleId for permission checks.
         var roleString = role.Name == AppRoles.Admin ? AppRoles.Admin : "Staff";
 
         _db.Users.Add(new User
@@ -317,7 +340,6 @@ public class AdminController : Controller
             .OrderBy(p => p.Name)
             .ToListAsync();
 
-        // Rehydrate names for display if model binding only sent Id/Selected
         var byId = perms.ToDictionary(p => p.Id, p => p.Name);
         foreach (var p in model.Permissions)
             p.Name = byId.TryGetValue(p.Id, out var n) ? n : p.Name;
@@ -349,9 +371,6 @@ public class AdminController : Controller
             .Where(p => p.Name == AppPermissions.ViewDashboard)
             .Select(p => p.Id)
             .FirstOrDefault();
-
-        if (viewDashboardPermissionId != 0 && !selectedPermissionIds.Contains(viewDashboardPermissionId))
-            selectedPermissionIds.Add(viewDashboardPermissionId);
 
         var role = new Role { Name = name, CreatedAt = DateTime.UtcNow };
         _db.Roles.Add(role);
@@ -436,6 +455,7 @@ public class AdminController : Controller
             .FirstOrDefault();
         if (viewDashboardPermissionId != 0)
             selectedPermissionIds.Add(viewDashboardPermissionId);
+
         var existingPermissionIds = await _db.RolePermissions
             .Where(rp => rp.RoleId == role.Id)
             .Select(rp => rp.PermissionId)
@@ -597,6 +617,7 @@ public class AdminController : Controller
         ViewBag.StatusFilter = status;
         return View(list);
     }
+
     [RequirePermission(AppPermissions.ViewApplication)]
     public async Task<IActionResult> ApplicationDetails(int id)
     {
@@ -1037,42 +1058,69 @@ public class AdminController : Controller
     [RequirePermission(AppPermissions.ViewDashboard)]
     public async Task<IActionResult> Reports()
     {
-        var apps = await _db.MarriageApplications.AsNoTracking()
-            .Include(a => a.User)
+        var data = await _db.MarriageApplications.AsNoTracking()
+            .Include(a => a.Payment)
             .OrderByDescending(a => a.SubmissionDate)
-            .Take(100)
+            .Select(a => new MarriageReportRow
+            {
+                Id = a.Id,
+                RefNo = $"MC-{a.Id:D3}",
+                Husband = a.HusbandName,
+                Wife = a.WifeName,
+                Amount = a.Payment != null ? a.Payment.Amount : 0,
+                Payment = a.Payment != null ? a.Payment.PaymentStatus : "Unpaid",
+                Status = a.Status,
+                Date = a.SubmissionDate
+            })
             .ToListAsync();
 
-        var allForStats = await _db.MarriageApplications.AsNoTracking().ToListAsync();
-        var byMonth = allForStats
-            .GroupBy(a => new { a.SubmissionDate.Year, a.SubmissionDate.Month })
+        var byMonth = data
+            .GroupBy(a => new { a.Date.Year, a.Date.Month })
             .OrderByDescending(g => g.Key.Year).ThenByDescending(g => g.Key.Month)
             .Take(12)
             .Select(g => new MonthlyReportRow
             {
                 Period = $"{g.Key.Year}-{g.Key.Month:D2}",
                 Total = g.Count(),
-                Pending = g.Count(x => x.Status == ApplicationStatus.PendingPayment || x.Status == ApplicationStatus.Pending),
+                Pending = g.Count(x => x.Status == ApplicationStatus.PendingPayment
+                                     || x.Status == ApplicationStatus.Pending),
                 Approved = g.Count(x => x.Status == ApplicationStatus.Approved),
                 Rejected = g.Count(x => x.Status == ApplicationStatus.Rejected)
-            })
-            .ToList();
+            }).ToList();
 
         var vm = new ReportsViewModel
         {
             ByMonth = byMonth,
-            RecentApplications = apps.Select(a => new MarriageApplicationSummary
-            {
-                Id = a.Id,
-                ApplicantEmail = a.User.Email,
-                HusbandName = a.HusbandName,
-                WifeName = a.WifeName,
-                Status = a.Status,
-                SubmissionDate = a.SubmissionDate
-            }).ToList()
+            Rows = data
         };
-
         return View(vm);
+    }
+
+    [RequirePermission(AppPermissions.ViewDashboard)]
+    public async Task<IActionResult> ReportsCsv()
+    {
+        var data = await _db.MarriageApplications.AsNoTracking()
+            .Include(a => a.Payment)
+            .OrderByDescending(a => a.SubmissionDate)
+            .Select(a => new MarriageReportRow
+            {
+                RefNo = $"MC-{a.Id:D3}",
+                Husband = a.HusbandName,
+                Wife = a.WifeName,
+                Amount = a.Payment != null ? a.Payment.Amount : 0,
+                Payment = a.Payment != null ? a.Payment.PaymentStatus : "Unpaid",
+                Status = a.Status,
+                Date = a.SubmissionDate
+            })
+            .ToListAsync();
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("Ref No,Husband,Wife,Amount,Payment,Status,Date");
+        foreach (var r in data)
+            sb.AppendLine($"{r.RefNo},{r.Husband},{r.Wife},{r.Amount:F2},{r.Payment},{r.Status},{r.Date:yyyy-MM-dd}");
+
+        return File(System.Text.Encoding.UTF8.GetBytes(sb.ToString()),
+                    "text/csv", "marriage_report.csv");
     }
 
     private async Task EnsureCertificateAsync(MarriageApplication app)

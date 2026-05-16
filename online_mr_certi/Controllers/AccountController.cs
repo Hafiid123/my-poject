@@ -51,6 +51,7 @@ public class AccountController : Controller
                 .Select(r => (int?)r.Id)
                 .FirstOrDefaultAsync()
         };
+
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
 
@@ -79,6 +80,7 @@ public class AccountController : Controller
 
         var email = model.Email.Trim().ToLowerInvariant();
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
+
         if (user is null || !BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
         {
             ModelState.AddModelError(string.Empty, "Invalid email or password.");
@@ -89,15 +91,26 @@ public class AccountController : Controller
         HttpContext.Session.SetString(SessionKeys.UserName, user.Name);
         HttpContext.Session.SetString(SessionKeys.UserEmail, user.Email);
         HttpContext.Session.SetString(SessionKeys.Role, user.Role);
+
         if (user.RoleId is not null)
+        {
             HttpContext.Session.SetInt32(SessionKeys.RoleId, user.RoleId.Value);
+
+            // Permissions session ku kaydi
+            var permissions = await _db.RolePermissions
+                .Where(rp => rp.RoleId == user.RoleId.Value)
+                .Join(_db.Permissions, rp => rp.PermissionId, p => p.Id, (rp, p) => p.Name)
+                .ToListAsync();
+
+            HttpContext.Session.SetString(SessionKeys.Permissions, string.Join(",", permissions));
+        }
 
         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             return Redirect(returnUrl);
 
-        return user.Role == AppRoles.Admin
-            ? RedirectToAction("Index", "Admin")
-            : RedirectToAction("Index", "Dashboard");
+        return user.Role == AppRoles.User
+    ? RedirectToAction("Index", "Dashboard")
+    : RedirectToAction("Index", "Admin");
     }
 
     [HttpPost]
@@ -111,7 +124,6 @@ public class AccountController : Controller
     private IActionResult RedirectToLanding()
     {
         var role = HttpContext.Session.GetString(SessionKeys.Role);
-        // Admin + Staff go to Admin panel; normal users go to User portal dashboard.
         return role == AppRoles.User
             ? RedirectToAction("Index", "Dashboard")
             : RedirectToAction("Index", "Admin");
