@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using online_mr_certi.Data;
 using online_mr_certi.Filters;
@@ -543,6 +543,45 @@ public class AdminController : Controller
         TempData["Message"] = "User updated successfully.";
         return RedirectToAction(nameof(Users));
     }
+
+    // ── DELETE PAYMENT ──────────────────────────
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [RequirePermission(AppPermissions.ManagePayments)]
+    public async Task<IActionResult> DeletePaymentConfirmed(int id)
+    {
+        var payment = await _db.Payments
+            .Include(p => p.Application)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (payment is null)
+            return NotFound();
+
+        // Delete receipt image file if exists
+        if (!string.IsNullOrEmpty(payment.ReceiptImage))
+        {
+            var path = Path.Combine(_env.WebRootPath,
+                payment.ReceiptImage.Replace('/', Path.DirectorySeparatorChar));
+            if (System.IO.File.Exists(path))
+                System.IO.File.Delete(path);
+        }
+
+        // Reset application status if payment was approved
+        if (payment.PaymentStatus == PaymentStatuses.Approved
+            && payment.Application is not null
+            && payment.Application.Status == ApplicationStatus.Pending)
+        {
+            payment.Application.Status = ApplicationStatus.PendingPayment;
+        }
+
+        _db.Payments.Remove(payment);
+        await _db.SaveChangesAsync();
+
+        TempData["Message"] = "Lacag-bixintii waa la tirtiray.";
+        return RedirectToAction(nameof(Payments));
+    }
+
+
 
     [HttpGet]
     [RequirePermission(AppPermissions.ManageUsers)]
@@ -1131,8 +1170,9 @@ public class AdminController : Controller
         var appForPdf = await _db.MarriageApplications
             .AsNoTracking()
             .Include(a => a.Witnesses)
+            .Include(a => a.Documents)
             .FirstAsync(a => a.Id == app.Id);
-
+        
         var dir = Path.Combine(_env.WebRootPath, "uploads", "certificates");
         Directory.CreateDirectory(dir);
         var fileName = $"{app.Id}_{Guid.NewGuid():N}.pdf";
@@ -1140,7 +1180,7 @@ public class AdminController : Controller
         var physical = Path.Combine(dir, fileName);
 
         await using (var fs = System.IO.File.Create(physical))
-            _pdf.GenerateCertificatePdf(appForPdf, fs);
+            _pdf.GenerateCertificatePdf(appForPdf, fs, _env.WebRootPath);
 
         _db.Certificates.Add(new Certificate
         {

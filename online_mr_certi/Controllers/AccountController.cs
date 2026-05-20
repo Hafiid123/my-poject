@@ -4,6 +4,8 @@ using online_mr_certi.Data;
 using online_mr_certi.Infrastructure;
 using online_mr_certi.Models;
 using online_mr_certi.Models.ViewModels;
+using System.Net;
+using System.Net.Mail;
 
 namespace online_mr_certi.Controllers;
 
@@ -14,6 +16,119 @@ public class AccountController : Controller
     public AccountController(AppDbContext db)
     {
         _db = db;
+    }
+
+    // 1. GET: Account/ForgotPassword
+    [HttpGet]
+    public IActionResult ForgotPassword()
+    {
+        return View();
+    }
+
+    // 2. POST: Account/ForgotPassword (Halkan ayaa isbadalka rasmiga ah lagu sameeyay!)
+    [HttpPost]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+    {
+        if (!ModelState.IsValid) return View(model);
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+        if (user != null)
+        {
+            string token = Guid.NewGuid().ToString();
+
+            // Kani waa link-gii dhabta ah ee qofku ku dhufan lahaa
+            var resetLink = Url.Action("ResetPassword", "Account",
+                new { email = user.Email, token = token }, Request.Scheme);
+
+            try
+            {
+                var mailMessage = new MailMessage
+                {
+                    // Halkaan ku qor Email-kaaga rasmiga ah ee nidaamku ka dhex dirayo xogta
+                    From = new MailAddress("portal@marriage-registry.com", "Marriage Registry System"),
+                    Subject = "Password Reset Request",
+                    Body = $@"
+                    <div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px; max-width: 500px;'>
+                        <h3 style='color: #2563eb;'>Password Reset Request</h3>
+                        <p>Waxaad nidaamka guurka ka soo codsatay inaad beddesho password-kaaga.</p>
+                        <p>Fadlan guji badanka hoose si aad u cusbooneysiiso xogtaada:</p>
+                        <a href='{resetLink}' style='background: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;'>Reset Password</a>
+                        <br/><br/>
+                        <p style='color: #666; font-size: 12px;'>Haddii aadan adigu codsan, fadlan iska indho-tir email-kan.</p>
+                    </div>",
+                    IsBodyHtml = true
+                };
+                mailMessage.To.Add(user.Email);
+
+                // --- KOODHKA Google Gmail SMTP (REAL EMAIL) ---
+                using (var smtpClient = new SmtpClient("smtp.gmail.com", 587))
+                {
+                    // 1. Email-kaaga Gmail-ka ah oo ah kan wax diraya:
+                    string myGmail = "hoooyo1230@gmail.com";
+
+                    // 2. 16-ka xaraf ee Google App Password (ka soo sameey Google Account):
+                    string myAppPassword = "qcej mtoi bbbl ogqv";
+
+                    smtpClient.Credentials = new NetworkCredential(myGmail, myAppPassword);
+                    smtpClient.EnableSsl = true;
+
+                    // Hadda wuxuu si toos ah ugu dhacayaa Gmail-ka dhabta ah ee qofka (user.Email)!
+                    await smtpClient.SendMailAsync(mailMessage);
+                }
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, "Email-ka lama diri karo hadda. Fadlan dib u tijaabi.");
+                return View(model);
+            }
+        }
+
+        return RedirectToAction("ForgotPasswordConfirmation");
+    }
+
+    // 3. GET: Account/ForgotPasswordConfirmation
+    [HttpGet]
+    public IActionResult ForgotPasswordConfirmation()
+    {
+        return View();
+    }
+
+    // 4. GET: Account/ResetPassword (Marka Link-ga Gmail-ka laga soo gujiyo)
+    [HttpGet]
+    public IActionResult ResetPassword(string email, string token)
+    {
+        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
+        {
+            return RedirectToAction("Login");
+        }
+
+        var model = new ResetPasswordViewModel { Email = email, Token = token };
+        return View(model);
+    }
+
+    // 5. POST: Account/ResetPassword (Kaydinta Password-ka cusub ee Database-ka)
+    [HttpPost]
+    public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+    {
+        if (!ModelState.IsValid) return View(model);
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+        if (user == null)
+        {
+            return RedirectToAction("Login");
+        }
+
+        // Password-ka cusub ayaan si ammaan ah u hash-gareynaynaa
+        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
+
+        // Waxay si toos ah u beddelaysaa tiirkii 'Password' ee database-kaaga ku jiray
+        user.Password = hashedPassword;
+
+        _db.Entry(user).State = EntityState.Modified;
+        await _db.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Password-kaagii si guul leh ayaa loo baddalay!";
+        return RedirectToAction("Login");
     }
 
     [HttpGet]
@@ -96,7 +211,6 @@ public class AccountController : Controller
         {
             HttpContext.Session.SetInt32(SessionKeys.RoleId, user.RoleId.Value);
 
-            // Permissions session ku kaydi
             var permissions = await _db.RolePermissions
                 .Where(rp => rp.RoleId == user.RoleId.Value)
                 .Join(_db.Permissions, rp => rp.PermissionId, p => p.Id, (rp, p) => p.Name)
@@ -109,14 +223,16 @@ public class AccountController : Controller
             return Redirect(returnUrl);
 
         return user.Role == AppRoles.User
-    ? RedirectToAction("Index", "Dashboard")
-    : RedirectToAction("Index", "Admin");
+            ? RedirectToAction("Index", "Dashboard")
+            : RedirectToAction("Index", "Admin");
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult Logout()
     {
+        //if (HttpContext.Session.GetInt32(SessionKeys.UserId) is not null)
+        //    return RedirectToLanding();
         HttpContext.Session.Clear();
         return RedirectToAction("Index", "Home");
     }

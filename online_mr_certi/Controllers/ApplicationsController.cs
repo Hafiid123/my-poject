@@ -46,8 +46,24 @@ public class ApplicationsController : Controller
     }
 
     [HttpGet]
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
+        var userId = HttpContext.Session.GetInt32(SessionKeys.UserId)!.Value;
+
+        // Hubi haddii user-ku hore application u leeyahay oo aan Rejected ahayn
+        var existing = await _db.MarriageApplications
+            .AsNoTracking()
+            .Where(a => a.UserId == userId && a.Status != ApplicationStatus.Rejected)
+            .OrderByDescending(a => a.Id)
+            .FirstOrDefaultAsync();
+
+        if (existing != null)
+        {
+            TempData["BlockedMessage"] = existing.Status;
+            TempData["BlockedAppId"] = existing.Id;
+            return RedirectToAction(nameof(Index));
+        }
+
         return View(new MarriageApplicationCreateViewModel
         {
             HusbandDob = DateTime.Today.AddYears(-30),
@@ -66,6 +82,19 @@ public class ApplicationsController : Controller
             return View(model);
 
         var userId = HttpContext.Session.GetInt32(SessionKeys.UserId)!.Value;
+
+        // Double-check: ka hortagga race condition
+        var existing = await _db.MarriageApplications
+            .Where(a => a.UserId == userId && a.Status != ApplicationStatus.Rejected)
+            .FirstOrDefaultAsync();
+
+        if (existing != null)
+        {
+            TempData["BlockedMessage"] = existing.Status;
+            TempData["BlockedAppId"] = existing.Id;
+            return RedirectToAction(nameof(Index));
+        }
+
         var app = new MarriageApplication
         {
             UserId = userId,
@@ -142,12 +171,12 @@ public class ApplicationsController : Controller
 
         var labeledUploads = new (IFormFile File, string Category, string ModelKey)[]
         {
-            (model.HusbandIdentityDocument!, DocumentCategories.HusbandIdentityDocument, nameof(model.HusbandIdentityDocument)),
-            (model.WifeIdentityDocument!, DocumentCategories.WifeIdentityDocument, nameof(model.WifeIdentityDocument)),
-            (model.Witness1IdentityDocument!, DocumentCategories.Witness1IdentityDocument, nameof(model.Witness1IdentityDocument)),
-            (model.Witness2IdentityDocument!, DocumentCategories.Witness2IdentityDocument, nameof(model.Witness2IdentityDocument)),
-            (model.HusbandPassportPhoto!, DocumentCategories.HusbandPassportPhoto, nameof(model.HusbandPassportPhoto)),
-            (model.WifePassportPhoto!, DocumentCategories.WifePassportPhoto, nameof(model.WifePassportPhoto))
+            (model.HusbandIdentityDocument!,  DocumentCategories.HusbandIdentityDocument,  nameof(model.HusbandIdentityDocument)),
+            (model.WifeIdentityDocument!,      DocumentCategories.WifeIdentityDocument,      nameof(model.WifeIdentityDocument)),
+            (model.Witness1IdentityDocument!,  DocumentCategories.Witness1IdentityDocument,  nameof(model.Witness1IdentityDocument)),
+            (model.Witness2IdentityDocument!,  DocumentCategories.Witness2IdentityDocument,  nameof(model.Witness2IdentityDocument)),
+            (model.HusbandPassportPhoto!,      DocumentCategories.HusbandPassportPhoto,      nameof(model.HusbandPassportPhoto)),
+            (model.WifePassportPhoto!,         DocumentCategories.WifePassportPhoto,         nameof(model.WifePassportPhoto))
         };
 
         foreach (var (file, category, key) in labeledUploads)

@@ -1,6 +1,630 @@
-@model List<online_mr_certi.Models.MarriageApplication>
-@using online_mr_certi.Models
-@{
-    ViewData["Title"] = "My applications";
-
-}<style>    /* ── PAGE HEADER ── */    .apps-header {        display: flex;        justify-content: space-between;        align-items: flex-end;        margin-bottom: 32px;        animation: fade-up 0.5s ease both;    }    .apps-header-left p {        font-size: 11px;        font-weight: 700;        letter-spacing: 2.5px;        text-transform: uppercase;        color: #2F80ED;        margin-bottom: 6px;    }    .apps-header-left h2 {        font-family: 'Playfair Display', serif;        font-size: clamp(24px, 3vw, 36px);        color: #1a2742;        font-weight: 700;        margin: 0;    }        .apps-header-left h2 span {            color: #2F80ED;        }    .btn-new-app {        display: inline-flex;        align-items: center;        gap: 8px;        padding: 12px 24px;        background: #2F80ED;        color: #fff;        border: none;        border-radius: 12px;        font-size: 14px;        font-weight: 600;        font-family: 'DM Sans', sans-serif;        text-decoration: none;        transition: all 0.25s;        box-shadow: 0 4px 14px rgba(47,128,237,0.28);    }        .btn-new-app:hover {            background: #1E66D0;            transform: translateY(-2px);            box-shadow: 0 8px 20px rgba(47,128,237,0.38);            color: #fff;        }        .btn-new-app .plus-icon {            width: 22px;            height: 22px;            background: rgba(255,255,255,0.22);            border-radius: 6px;            display: flex;            align-items: center;            justify-content: center;            font-size: 13px;        }    /* ── EMPTY STATE ── */    .empty-state {        text-align: center;        padding: 80px 24px;        background: #fff;        border-radius: 20px;        border: 1px dashed #c7d7f0;        animation: fade-up 0.5s ease both;    }    .empty-icon {        width: 72px;        height: 72px;        background: #eef3fc;        border-radius: 20px;        display: flex;        align-items: center;        justify-content: center;        font-size: 32px;        margin: 0 auto 20px;    }    .empty-state h4 {        color: #1a2742;        font-size: 18px;        font-weight: 600;        margin-bottom: 8px;    }    .empty-state p {        color: #94a3b8;        font-size: 14px;        margin-bottom: 24px;    }    .btn-start {        display: inline-flex;        align-items: center;        gap: 8px;        padding: 12px 28px;        background: #2F80ED;        color: #fff;        border-radius: 12px;        font-size: 14px;        font-weight: 600;        text-decoration: none;        transition: all 0.25s;        box-shadow: 0 4px 14px rgba(47,128,237,0.28);    }        .btn-start:hover {            background: #1E66D0;            color: #fff;            transform: translateY(-2px);        }    /* ── TABLE CARD ── */    .table-card {        background: #fff;        border-radius: 20px;        border: 1px solid #e8eef8;        box-shadow: 0 2px 16px rgba(30,102,208,0.07);        overflow: hidden;        animation: fade-up 0.5s ease 0.1s both;    }    /* ── TABLE ── */    .apps-table {        width: 100%;        border-collapse: collapse;        font-size: 14px;    }        .apps-table thead tr {            background: #f8fafd;            border-bottom: 1px solid #e8eef8;        }        .apps-table thead th {            padding: 14px 20px;            font-size: 11px;            font-weight: 700;            letter-spacing: 1.5px;            text-transform: uppercase;            color: #94a3b8;            white-space: nowrap;        }        .apps-table tbody tr {            border-bottom: 1px solid #f1f5f9;            transition: background 0.2s;        }            .apps-table tbody tr:last-child {                border-bottom: none;            }            .apps-table tbody tr:hover {                background: #f8fafd;            }        .apps-table td {            padding: 16px 20px;            color: #333333;            vertical-align: middle;        }    /* ID cell */    .cell-id {        font-weight: 700;        color: #94a3b8;        font-size: 13px;    }    /* Parties cell */    .cell-parties {        font-weight: 600;        color: #1a2742;    }        .cell-parties .party-sep {            color: #c7d7f0;            margin: 0 4px;        }    /* Date cells */    .cell-date {        color: #555555;    }    .cell-submitted {        color: #94a3b8;        font-size: 13px;    }    /* ── BADGES ── */    .status-badge {        display: inline-flex;        align-items: center;        gap: 5px;        padding: 5px 12px;        border-radius: 100px;        font-size: 12px;        font-weight: 600;        white-space: nowrap;    }        .status-badge .dot {            width: 6px;            height: 6px;            border-radius: 50%;            flex-shrink: 0;        }    .badge-pending-payment {        background: #f1f5f9;        color: #475569;    }        .badge-pending-payment .dot {            background: #94a3b8;        }    .badge-pending {        background: #fffbeb;        color: #b45309;    }        .badge-pending .dot {            background: #f59e0b;        }    .badge-approved {        background: #ecfdf5;        color: #065f46;    }        .badge-approved .dot {            background: #10b981;        }    .badge-rejected {        background: #fef2f2;        color: #991b1b;    }        .badge-rejected .dot {            background: #ef4444;        }    .badge-none {        background: #f1f5f9;        color: #94a3b8;    }    /* ── ACTION BUTTONS ── */    .action-cell {        display: flex;        gap: 8px;        justify-content: flex-end;        align-items: center;    }    .btn-action {        display: inline-flex;        align-items: center;        gap: 5px;        padding: 7px 14px;        border-radius: 8px;        font-size: 12px;        font-weight: 600;        font-family: 'DM Sans', sans-serif;        text-decoration: none;        cursor: pointer;        border: none;        transition: all 0.2s;        white-space: nowrap;    }    .btn-action-outline {        background: #fff;        color: #1E66D0;        border: 1.5px solid #c7d7f0;    }        .btn-action-outline:hover {            background: #eef3fc;            border-color: #1E66D0;            color: #1E66D0;        }    .btn-action-pay {        background: #10b981;        color: #fff;        box-shadow: 0 2px 8px rgba(16,185,129,0.25);    }        .btn-action-pay:hover {            background: #059669;            color: #fff;            transform: translateY(-1px);            box-shadow: 0 4px 12px rgba(16,185,129,0.35);        }    .btn-action-cert {        background: #2F80ED;        color: #fff;        box-shadow: 0 2px 8px rgba(47,128,237,0.25);    }        .btn-action-cert:hover {            background: #1E66D0;            color: #fff;            transform: translateY(-1px);            box-shadow: 0 4px 12px rgba(47,128,237,0.35);        }    /* ── ANIMATIONS ── */    @@keyframes fade-up {        from    {        opacity: 0;        transform: translateY(16px);    }    to {        opacity: 1;        transform: translateY(0);    }    }    /* ── RESPONSIVE ── */    @@media (max-width: 768px) {        .apps-header    {        flex-direction: column;        align-items: flex-start;        gap: 16px;    }    .apps-table thead th:nth-child(3),    .apps-table td:nth-child(3),    .apps-table thead th:nth-child(4),    .apps-table td:nth-child(4) {        display: none;    }    }</style><!-- HEADER --><div class="apps-header">    <div class="apps-header-left">        <p>📋 Applications</p>        <h2>My <span>Applications</span></h2>    </div>    <a class="btn-new-app" asp-action="Create">        <span class="plus-icon"><i class="fas fa-plus"></i></span>        New application    </a></div>@if (Model.Count == 0){    <!-- EMPTY STATE -->    <div class="empty-state">        <div class="empty-icon">📄</div>        <h4>No applications yet</h4>        <p>You have not submitted any marriage certificate applications yet.</p>        <a class="btn-start" asp-action="Create">            <i class="fas fa-plus"></i> Start an application        </a>    </div>}else{    <!-- TABLE CARD -->    <div class="table-card">        <div class="table-responsive">            <table class="apps-table">                <thead>                    <tr>                        <th>#</th>                        <th>Parties</th>                        <th>Marriage date</th>                        <th>Submitted</th>                        <th>Payment</th>                        <th>Status</th>                        <th></th>                    </tr>                </thead>                <tbody>                    @foreach (var a in Model)                    {                        <tr>                            <!-- ID -->                            <td class="cell-id">@a.Id</td>                            <!-- Parties -->                            <td class="cell-parties">                                @a.HusbandName                                <span class="party-sep">&amp;</span>                                @a.WifeName                            </td>                            <!-- Marriage Date -->                            <td class="cell-date">@a.MarriageDate.ToString("yyyy-MM-dd")</td>                            <!-- Submitted -->                            <td class="cell-submitted">@a.SubmissionDate.ToString("yyyy-MM-dd HH:mm") UTC</td>                            <!-- Payment Badge -->                            <td>                                @if (a.Payment == null)                                {                                    <span class="status-badge badge-none">—</span>                                }                                else if (a.Payment.PaymentStatus == PaymentStatuses.Pending)                                {                                    <span class="status-badge badge-pending">                                        <span class="dot"></span>Pending                                    </span>                                }                                else if (a.Payment.PaymentStatus == PaymentStatuses.Approved)                                {                                    <span class="status-badge badge-approved">                                        <span class="dot"></span>Approved                                    </span>                                }                                else                                {                                    <span class="status-badge badge-rejected">                                        <span class="dot"></span>Rejected                                    </span>                                }                            </td>                            <!-- Status Badge -->                            <td>                                @if (a.Status == ApplicationStatus.PendingPayment)                                {                                    <span class="status-badge badge-pending-payment">                                        <span class="dot"></span>Pending Payment                                    </span>                                }                                else if (a.Status == ApplicationStatus.Pending)                                {                                    <span class="status-badge badge-pending">                                        <span class="dot"></span>Pending                                    </span>                                }                                else if (a.Status == ApplicationStatus.Approved)                                {                                    <span class="status-badge badge-approved">                                        <span class="dot"></span>Approved                                    </span>                                }                                else                                {                                    <span class="status-badge badge-rejected">                                        <span class="dot"></span>Rejected                                    </span>                                }                            </td>                            <!-- Actions -->                            <td>                                <div class="action-cell">                                    <a class="btn-action btn-action-outline"                                       asp-action="Details" asp-route-id="@a.Id">                                        <i class="fas fa-eye"></i> Details                                    </a>                                    @if (a.Status == ApplicationStatus.PendingPayment && a.Payment != null && a.Payment.PaymentStatus != PaymentStatuses.Approved)                                    {                                        var waiting = a.Payment.PaymentStatus == PaymentStatuses.Pending && !string.IsNullOrEmpty(a.Payment.ReceiptImage);                                        if (!waiting)                                        {                                            <a class="btn-action btn-action-pay"                                               asp-action="Checkout" asp-route-id="@a.Id">                                                <i class="fas fa-credit-card"></i> Pay now                                            </a>                                        }                                    }                                    else if (a.Payment != null && a.Payment.PaymentStatus == PaymentStatuses.Rejected)                                    {                                        <a class="btn-action btn-action-pay"                                           asp-action="Checkout" asp-route-id="@a.Id">                                            <i class="fas fa-credit-card"></i> Pay now                                        </a>                                    }                                    @if (a.Status == ApplicationStatus.Approved && a.Certificate != null)                                    {                                        <a class="btn-action btn-action-cert"                                           asp-action="DownloadCertificate" asp-route-id="@a.Id">                                            <i class="fas fa-download"></i> Certificate                                        </a>                                    }                                </div>                            </td>                        </tr>                    }                </tbody>            </table>        </div>    </div>}
+@model List<online_mr_certi.Models.MarriageApplication>
+@using online_mr_certi.Models
+@{
+    ViewData["Title"] = "My applications";
+
+    // Hubi haddii user-ku application active leeyahay
+    var hasActive = Model.Any(a => a.Status != ApplicationStatus.Rejected);
+}
+
+<style>
+    /* ── PAGE HEADER ── */
+    .apps-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 32px;
+        animation: fade-up 0.5s ease both;
+    }
+
+    .apps-header-left p {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        color: #2F80ED;
+        margin-bottom: 6px;
+    }
+
+    .apps-header-left h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(24px, 3vw, 36px);
+        color: #1a2742;
+        font-weight: 700;
+        margin: 0;
+    }
+
+        .apps-header-left h2 span {
+            color: #2F80ED;
+        }
+
+    .btn-new-app {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: #2F80ED;
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        font-family: 'DM Sans', sans-serif;
+        text-decoration: none;
+        transition: all 0.25s;
+        box-shadow: 0 4px 14px rgba(47,128,237,0.28);
+    }
+
+        .btn-new-app:hover {
+            background: #1E66D0;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(47,128,237,0.38);
+            color: #fff;
+        }
+
+        .btn-new-app .plus-icon {
+            width: 22px;
+            height: 22px;
+            background: rgba(255,255,255,0.22);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+        }
+
+    /* ── BLOCKED ALERT ── */
+    .blocked-alert {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 18px 22px;
+        background: #fffbeb;
+        border: 1.5px solid #fcd34d;
+        border-radius: 14px;
+        margin-bottom: 24px;
+        animation: fade-up 0.4s ease both;
+    }
+
+    .blocked-alert-icon {
+        width: 38px;
+        height: 38px;
+        background: #fef3c7;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    .blocked-alert-body strong {
+        display: block;
+        color: #92400e;
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .blocked-alert-body span {
+        color: #78350f;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .btn-view-app {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 10px;
+        padding: 7px 16px;
+        background: #fff;
+        color: #1E66D0;
+        border: 1.5px solid #c7d7f0;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+        .btn-view-app:hover {
+            background: #eef3fc;
+            border-color: #1E66D0;
+            color: #1E66D0;
+        }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+        background: #fff;
+        border-radius: 20px;
+        border: 1px dashed #c7d7f0;
+        animation: fade-up 0.5s ease both;
+    }
+
+    .empty-icon {
+        width: 72px;
+        height: 72px;
+        background: #eef3fc;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        margin: 0 auto 20px;
+    }
+
+    .empty-state h4 {
+        color: #1a2742;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .empty-state p {
+        color: #94a3b8;
+        font-size: 14px;
+        margin-bottom: 24px;
+    }
+
+    .btn-start {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        background: #2F80ED;
+        color: #fff;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.25s;
+        box-shadow: 0 4px 14px rgba(47,128,237,0.28);
+    }
+
+        .btn-start:hover {
+            background: #1E66D0;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+    /* ── TABLE CARD ── */
+    .table-card {
+        background: #fff;
+        border-radius: 20px;
+        border: 1px solid #e8eef8;
+        box-shadow: 0 2px 16px rgba(30,102,208,0.07);
+        overflow: hidden;
+        animation: fade-up 0.5s ease 0.1s both;
+    }
+
+    /* ── TABLE ── */
+    .apps-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+        .apps-table thead tr {
+            background: #f8fafd;
+            border-bottom: 1px solid #e8eef8;
+        }
+
+        .apps-table thead th {
+            padding: 14px 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #94a3b8;
+            white-space: nowrap;
+        }
+
+        .apps-table tbody tr {
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.2s;
+        }
+
+            .apps-table tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            .apps-table tbody tr:hover {
+                background: #f8fafd;
+            }
+
+        .apps-table td {
+            padding: 16px 20px;
+            color: #333333;
+            vertical-align: middle;
+        }
+
+    /* ID cell */
+    .cell-id {
+        font-weight: 700;
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+    /* Parties cell */
+    .cell-parties {
+        font-weight: 600;
+        color: #1a2742;
+    }
+
+        .cell-parties .party-sep {
+            color: #c7d7f0;
+            margin: 0 4px;
+        }
+
+    /* Date cells */
+    .cell-date {
+        color: #555555;
+    }
+
+    .cell-submitted {
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+    /* ── BADGES ── */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 12px;
+        border-radius: 100px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+        .status-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+    .badge-pending-payment {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+        .badge-pending-payment .dot {
+            background: #94a3b8;
+        }
+
+    .badge-pending {
+        background: #fffbeb;
+        color: #b45309;
+    }
+
+        .badge-pending .dot {
+            background: #f59e0b;
+        }
+
+    .badge-approved {
+        background: #ecfdf5;
+        color: #065f46;
+    }
+
+        .badge-approved .dot {
+            background: #10b981;
+        }
+
+    .badge-rejected {
+        background: #fef2f2;
+        color: #991b1b;
+    }
+
+        .badge-rejected .dot {
+            background: #ef4444;
+        }
+
+    .badge-none {
+        background: #f1f5f9;
+        color: #94a3b8;
+    }
+
+    /* ── ACTION BUTTONS ── */
+    .action-cell {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        font-family: 'DM Sans', sans-serif;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+
+    .btn-action-outline {
+        background: #fff;
+        color: #1E66D0;
+        border: 1.5px solid #c7d7f0;
+    }
+
+        .btn-action-outline:hover {
+            background: #eef3fc;
+            border-color: #1E66D0;
+            color: #1E66D0;
+        }
+
+    .btn-action-pay {
+        background: #10b981;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(16,185,129,0.25);
+    }
+
+        .btn-action-pay:hover {
+            background: #059669;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16,185,129,0.35);
+        }
+
+    .btn-action-cert {
+        background: #2F80ED;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(47,128,237,0.25);
+    }
+
+        .btn-action-cert:hover {
+            background: #1E66D0;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(47,128,237,0.35);
+        }
+
+    /* ── ANIMATIONS ── */
+    @@keyframes fade-up {
+        from {
+            opacity: 0;
+            transform: translateY(16px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ── RESPONSIVE ── */
+    @@media (max-width: 768px) {
+        .apps-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .apps-table thead th:nth-child(3),
+        .apps-table td:nth-child(3),
+        .apps-table thead th:nth-child(4),
+        .apps-table td:nth-child(4) {
+            display: none;
+        }
+    }
+</style>
+
+<!-- HEADER -->
+<div class="apps-header">
+    <div class="apps-header-left">
+        <p>📋 Applications</p>
+        <h2>My <span>Applications</span></h2>
+    </div>
+    @* Haddii application active jirto — qari button-ka *@
+    @if (!hasActive)
+    {
+        <a class="btn-new-app" asp-action="Create">
+            <span class="plus-icon"><i class="fas fa-plus"></i></span>
+            New application
+        </a>
+    }
+</div>
+
+@* ===== BLOCKED ALERT ===== *@
+@if (TempData["BlockedMessage"] != null)
+{
+    var status = TempData["BlockedMessage"]?.ToString();
+    var appId = TempData["BlockedAppId"];
+
+    <div class="blocked-alert">
+        <div class="blocked-alert-icon">⚠️</div>
+        <div class="blocked-alert-body">
+            <strong>You already have an active application.</strong>
+            @if (status == ApplicationStatus.PendingPayment)
+            {
+                <span>Your application is <b>awaiting payment</b>. Please complete your payment before submitting a new one.</span>
+            }
+            else if (status == ApplicationStatus.Pending)
+            {
+                <span>Your application is currently <b>under review</b>. You cannot submit a new one until a decision is made.</span>
+            }
+            else if (status == ApplicationStatus.Approved)
+            {
+                <span>Your application has already been <b>approved</b>. You cannot submit another application.</span>
+            }
+            else
+            {
+                <span>You already have an application with status: <b>@status</b>.</span>
+            }
+            @if (appId != null)
+            {
+                <br />
+                <a asp-action="Details" asp-route-id="@appId" class="btn-view-app">
+                    <i class="fas fa-eye"></i> View my application
+                </a>
+            }
+        </div>
+    </div>
+}
+
+@* ===== SUCCESS MESSAGE ===== *@
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-3" role="alert"
+         style="border-radius: 14px; border: 1.5px solid #6ee7b7; background: #ecfdf5; color: #065f46;">
+        <i class="fas fa-check-circle me-2"></i>@TempData["Message"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (Model.Count == 0)
+{
+    <!-- EMPTY STATE -->
+    <div class="empty-state">
+        <div class="empty-icon">📄</div>
+        <h4>No applications yet</h4>
+        <p>You have not submitted any marriage certificate applications yet.</p>
+        <a class="btn-start" asp-action="Create">
+            <i class="fas fa-plus"></i> Start an application
+        </a>
+    </div>
+}
+else
+{
+    <!-- TABLE CARD -->
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="apps-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Parties</th>
+                        <th>Marriage date</th>
+                        <th>Submitted</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model)
+                    {
+                        <tr>
+                            <!-- ID -->
+                            <td class="cell-id">@a.Id</td>
+
+                            <!-- Parties -->
+                            <td class="cell-parties">
+                                @a.HusbandName
+                                <span class="party-sep">&amp;</span>
+                                @a.WifeName
+                            </td>
+
+                            <!-- Marriage Date -->
+                            <td class="cell-date">@a.MarriageDate.ToString("yyyy-MM-dd")</td>
+
+                            <!-- Submitted -->
+                            <td class="cell-submitted">@a.SubmissionDate.ToString("yyyy-MM-dd HH:mm") UTC</td>
+
+                            <!-- Payment Badge -->
+                            <td>
+                                @if (a.Payment == null)
+                                {
+                                    <span class="status-badge badge-none">—</span>
+                                }
+                                else if (a.Payment.PaymentStatus == PaymentStatuses.Pending)
+                                {
+                                    <span class="status-badge badge-pending">
+                                        <span class="dot"></span>Pending
+                                    </span>
+                                }
+                                else if (a.Payment.PaymentStatus == PaymentStatuses.Approved)
+                                {
+                                    <span class="status-badge badge-approved">
+                                        <span class="dot"></span>Approved
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge badge-rejected">
+                                        <span class="dot"></span>Rejected
+                                    </span>
+                                }
+                            </td>
+
+                            <!-- Status Badge -->
+                            <td>
+                                @if (a.Status == ApplicationStatus.PendingPayment)
+                                {
+                                    <span class="status-badge badge-pending-payment">
+                                        <span class="dot"></span>Pending Payment
+                                    </span>
+                                }
+                                else if (a.Status == ApplicationStatus.Pending)
+                                {
+                                    <span class="status-badge badge-pending">
+                                        <span class="dot"></span>Pending
+                                    </span>
+                                }
+                                else if (a.Status == ApplicationStatus.Approved)
+                                {
+                                    <span class="status-badge badge-approved">
+                                        <span class="dot"></span>Approved
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge badge-rejected">
+                                        <span class="dot"></span>Rejected
+                                    </span>
+                                }
+                            </td>
+
+                            <!-- Actions -->
+                            <td>
+                                <div class="action-cell">
+                                    <a class="btn-action btn-action-outline"
+                                       asp-action="Details" asp-route-id="@a.Id">
+                                        <i class="fas fa-eye"></i> Details
+                                    </a>
+                                    @if (a.Status == ApplicationStatus.PendingPayment && a.Payment != null && a.Payment.PaymentStatus != PaymentStatuses.Approved)
+                                    {
+                                        var waiting = a.Payment.PaymentStatus == PaymentStatuses.Pending && !string.IsNullOrEmpty(a.Payment.ReceiptImage);
+                                        if (!waiting)
+                                        {
+                                            <a class="btn-action btn-action-pay"
+                                               asp-action="Checkout" asp-route-id="@a.Id">
+                                                <i class="fas fa-credit-card"></i> Pay now
+                                            </a>
+                                        }
+                                    }
+                                    else if (a.Payment != null && a.Payment.PaymentStatus == PaymentStatuses.Rejected)
+                                    {
+                                        <a class="btn-action btn-action-pay"
+                                           asp-action="Checkout" asp-route-id="@a.Id">
+                                            <i class="fas fa-credit-card"></i> Pay now
+                                        </a>
+                                    }
+                                    @if (a.Status == ApplicationStatus.Approved && a.Certificate != null)
+                                    {
+                                        <a class="btn-action btn-action-cert"
+                                           asp-action="DownloadCertificate" asp-route-id="@a.Id">
+                                            <i class="fas fa-download"></i> Certificate
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

@@ -29,4 +29,6 @@ public class User
 
     public ICollection<MarriageApplication> MarriageApplications { get; set; } = new List<MarriageApplication>();
     public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
+
 }
