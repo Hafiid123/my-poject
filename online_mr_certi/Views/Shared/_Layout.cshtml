@@ -13,7 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Online Marriage Certificate System</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="icon" type="image/jpeg" href="~/logo.jpg" />
+    <link rel="icon" type="image/jpeg" href="~/logo2.png" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -937,6 +937,25 @@
             max-width: 100% !important;
             padding-left: 0 !important; padding-right: 0 !important; margin: 0 !important;
         }
+
+        @@media (max-width: 768px) {
+            .main-nav {
+                padding: 12px 16px;
+                flex-wrap: wrap;
+            }
+
+            .nav-links {
+                display: none;
+            }
+            /* Nav-actions mobile-ka HIDE */
+            .nav-actions {
+                display: none;
+            }
+
+            .nav-toggler {
+                display: block;
+            }
+        }
     </style>
 </head>
 <script>
@@ -952,7 +971,7 @@
     <nav class="main-nav">
         <a class="nav-logo" asp-controller="Home" asp-action="Index">
             <div class="nav-logo-icon">
-                <img src="~/logo.jpg" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;" />
+                <img src="~/logo2.png" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;" />
             </div>
             <div class="nav-logo-text">Marriage Certificate Portal</div>
         </a>
@@ -1182,6 +1201,53 @@
             links.style.gap           = '16px';
             links.style.borderBottom  = '1px solid var(--border)';
             links.style.zIndex        = '999';
+        }
+
+
+                function toggleMobileNav() {
+            var links   = document.querySelector('.nav-links');
+            var actions = document.querySelector('.nav-actions');
+            var isOpen  = links.getAttribute('data-open') === 'true';
+
+            if (isOpen) {
+                // Close
+                links.removeAttribute('style');
+                actions.removeAttribute('style');
+                links.setAttribute('data-open', 'false');
+            } else {
+                // Open
+                var navH = document.querySelector('.main-nav').offsetHeight;
+
+                // Nav links
+                links.style.display       = 'flex';
+                links.style.flexDirection = 'column';
+                links.style.position      = 'fixed';
+                links.style.top           = navH + 'px';
+                links.style.left          = '0';
+                links.style.right         = '0';
+                links.style.background    = 'var(--bg-nav)';
+                links.style.padding       = '16px 20px';
+                links.style.gap           = '14px';
+                links.style.borderBottom  = '1px solid var(--border)';
+                links.style.zIndex        = '999';
+                links.style.backdropFilter = 'blur(16px)';
+
+                // Nav actions (Sign In / Register / User info)
+                actions.style.display       = 'flex';
+                actions.style.flexDirection = 'column';
+                actions.style.position      = 'fixed';
+                actions.style.top           = (navH + links.scrollHeight + 10) + 'px';
+                actions.style.left          = '0';
+                actions.style.right         = '0';
+                actions.style.background    = 'var(--bg-nav)';
+                actions.style.padding       = '12px 20px 20px';
+                actions.style.gap           = '10px';
+                actions.style.borderBottom  = '1px solid var(--border)';
+                actions.style.zIndex        = '999';
+                actions.style.backdropFilter = 'blur(16px)';
+
+                links.setAttribute('data-open', 'true');
+            }
         }
     </script>
 

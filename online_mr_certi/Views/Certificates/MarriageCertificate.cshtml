@@ -1,0 +1,196 @@
+﻿@* @model online_mr_certi.Models.MarriageApplication
+@{
+    Layout = null;
+    var certNo = $"MC-{Model.Id:D6}-{Model.SubmissionDate:yyyy}";
+    var appNo = $"MCII-{Model.SubmissionDate:yyyyMMdd}-{Model.Id:D4}";
+}
+
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="utf-8" />
+    <title>Shahaadada Meherka - @Model.Id</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            color: #1a1a1a;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .page-border {
+            border: 15px solid #ffffff;
+            outline: 4px solid #b8860b; /* Gold border */
+            outline-offset: -10px;
+            padding: 30px;
+            min-height: 275mm; /* Habaynta A4 */
+            position: relative;
+        }
+
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-bottom: 2px solid #a91d22; /* Khadka Cas */
+            padding-bottom: 10px;
+        }
+
+        .title-block {
+            text-align: center;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        .title-main {
+            font-size: 26px;
+            font-weight: bold;
+            color: #0d3c61;
+            margin: 0;
+        }
+
+        .title-sub {
+            font-size: 11px;
+            color: #3d3d3d;
+            margin-top: 3px;
+        }
+
+        .numbers-table {
+            width: 100%;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+
+        .legal-text {
+            text-align: justify;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .bold {
+            font-weight: bold;
+            color: #0d3c61;
+        }
+
+        .witness-section {
+            margin-top: 20px;
+            border-top: 1px solid #d4a843;
+            padding-top: 10px;
+        }
+
+        .witness-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #0d3c61;
+            margin-bottom: 5px;
+        }
+
+        .witness-text {
+            font-size: 12.5px;
+            text-align: justify;
+            line-height: 1.5;
+        }
+
+        .footer-table {
+            width: 100%;
+            margin-top: 50px;
+        }
+
+        .stamp-box {
+            border: 2px dashed #1d5a8a;
+            border-radius: 50%;
+            width: 85px;
+            height: 85px;
+            text-align: center;
+            margin: 0 auto;
+            padding: 5px;
+        }
+
+        .signature-line {
+            border-top: 1px solid #1a1a1a;
+            margin-top: 35px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-border">
+
+        <table class="header-table">
+            <tr>
+                <td style="width: 35%; font-size: 11px; font-weight: bold; color: #0d3c61; text-align: left; vertical-align: middle;">
+                    JAMHUURIYADDA FEDERAALKA SOOMAALIYA<br>
+                    <span style="font-size: 9px; color: #3d3d3d; font-weight: normal;">Wasaaradda Amniga Gudaha</span>
+                </td>
+                <td style="width: 30%; text-align: center; vertical-align: middle;">
+                    <img src="@@Path.Combine(ViewBag.WebRootPath, "images", "logo.png")" style="height: 60px;" alt="Logo" />
+                </td>
+                <td style="width: 35%; font-size: 13px; font-weight: bold; color: #0d3c61; text-align: right; vertical-align: middle;">
+                    جمهورية الصومال الفيدرالية<br>
+                    <span style="font-size: 11px; color: #3d3d3d; font-weight: normal;">وزارة الأمن الداخلي</span>
+                </td>
+            </tr>
+        </table>
+
+        <div class="title-block">
+            <h1 class="title-main">SHAHADADA MEHERKA</h1>
+            <div class="title-sub">(MARRIAGE CERTIFICATE / شهادة عقد النكاح)</div>
+        </div>
+
+        <table class="numbers-table">
+            <tr>
+                <td style="text-align: left; color: #555; font-weight: bold;">Lr. Codsiga (App No): <span style="font-family: monospace; color:#000;">@appNo</span></td>
+                <td style="text-align: right; color: #555; font-weight: bold;">Lr. Shahaadada (Cert No): <span style="font-family: monospace; color:#1a1a1a; font-size: 13px;">@certNo</span></td>
+            </tr>
+        </table>
+
+        <div class="legal-text">
+            Nagu waa caddeynaysaa in <span class="bold">@Model.HusbandName</span> (Ninka) iyo <span class="bold">@Model.WifeName</span> (Gabadha), ay si sharci ah oo ay ka buuxaan dhammaan shuruudaha Fiqiga Islaamku ku midoobay meher xalaal ah markay taariikhdu ahayd <span class="bold">@Model.MarriageDate.ToString("dd MMMM, yyyy")</span>, kuna midoobay goobta rasmiga ah ee: <span class="bold">@Model.MarriageLocation</span>.
+            <br><br>
+            Guurkani wuxuu ka dhacay diiwaanka rasmiga ah ee maxkamadda sharciga ah, waxana loo diiwaangeliyey si waafaqsan sharciga guurka dalka ee rasmiga ah, iyadoo qaybta diiwaangalinta madaniga ah ee Wasaaradda Amniga Gudaha ay si buuxda u aqoonsan tahay aqoonsigooda sharci.
+        </div>
+
+        <div class="witness-section">
+            <div class="witness-title">MARKHAATIYAASHA RASMIGA AH / OFFICIAL WITNESSES</div>
+            <div class="witness-text">
+                Guurkaan rasmiga ah waxaa goob-joog ka ahaa oo markhaati ka furay isbeddelkiisa xalaaliga ah markhaatiyaasha diiwaangashan ee hoos ku xusan:
+                @for (int i = 0; i < Model.Witnesses.Count; i++)
+                {
+                    var w = Model.Witnesses.ElementAt(i);
+                    <span>Markhaati @(i + 1)-aad: <span class="bold">@w.FullName</span> (Aqoonsi Lr: @w.IdNumber, Tel: @w.ContactNumber)@(i < Model.Witnesses.Count - 1 ? " iyo " : "")</span>
+                }
+                kuwaas oo si buuxda u qireen qiraalka sharciga ah ee meherka kor ku xusan.
+            </div>
+        </div>
+
+        <table class="footer-table">
+            <tr>
+                <td style="width: 33%; text-align: center; vertical-align: bottom;">
+                    <img src="@@Path.Combine(ViewBag.WebRootPath, "images", "sample-qr.png")" style="height: 65px;" alt="QR" />
+                </td>
+
+                <td style="width: 34%; text-align: center; vertical-align: middle;">
+                    <div class="stamp-box">
+                        <span style="font-size: 5px; font-weight: bold; color: #1d5a8a; display: block; tracking-letter: 0.5px;">CIVIL REGISTRATION</span>
+                        <img src="@@Path.Combine(ViewBag.WebRootPath, "images", "logo.png")" style="height: 25px; margin: 3px 0;" />
+                        <span style="font-size: 5px; font-weight: bold; color: #1d5a8a; display: block;">SOMALIA APPROVED ✔</span>
+                    </div>
+                </td>
+
+                <td style="width: 33%; text-align: center; vertical-align: bottom;">
+                    <img src="@@Path.Combine(ViewBag.WebRootPath, "images", "signature-hassan.png")" style="height: 30px; display: block; margin: 0 auto;" />
+                    <div class="signature-line">
+                        HASSAN M. ALI<br>
+                        <span style="font-size: 8px; color: #555; font-weight: normal;">Director General Civil Registry</span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+    </div>
+
+</body>
+</html> *@

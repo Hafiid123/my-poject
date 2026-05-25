@@ -1,220 +1,712 @@
 @model MarriageApplicationCreateViewModel
 @{
-    ViewData["Title"] = "New marriage application";
+    ViewData["Title"] = "New Marriage Application";
 }
-<h2 class="h4 mb-3">Marriage application</h2>
-<form asp-action="Create" method="post" enctype="multipart/form-data" class="needs-validation">
-    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
-    <div class="card shadow-sm mb-3">
-        <div class="card-header fw-semibold">Husband</div>
-        <div class="card-body row g-3">
-            <div class="col-md-6">
-                <label asp-for="HusbandName" class="form-label"></label>
-                <input asp-for="HusbandName" class="form-control" />
-                <span asp-validation-for="HusbandName" class="text-danger small"></span>
+<style>
+    .wizard-wrap {
+        max-width: 780px;
+        margin: 0 auto;
+        padding: 1.5rem 1rem;
+    }
+
+    /* ── Progress bar ── */
+    .progress-bar-wrap {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 2.5rem;
+        position: relative;
+    }
+
+        .progress-bar-wrap::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e2e8f0;
+            z-index: 0;
+        }
+
+    .progress-line {
+        position: absolute;
+        top: 20px;
+        left: 0;
+        height: 2px;
+        background: #0d6e6e;
+        z-index: 1;
+        transition: width .4s ease;
+    }
+
+    .step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        position: relative;
+        z-index: 2;
+        flex: 1;
+    }
+
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid #e2e8f0;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 14px;
+        color: #94a3b8;
+        transition: all .3s ease;
+        cursor: default;
+    }
+
+    .step-item.active .step-circle {
+        background: #0d6e6e;
+        border-color: #0d6e6e;
+        color: #fff;
+    }
+
+    .step-item.done .step-circle {
+        background: #0d6e6e;
+        border-color: #0d6e6e;
+        color: #fff;
+    }
+
+        .step-item.done .step-circle::after {
+            content: '✓';
+        }
+
+    .step-item.done .step-number {
+        display: none;
+    }
+
+    .step-label {
+        font-size: 11px;
+        color: #94a3b8;
+        text-align: center;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .step-item.active .step-label {
+        color: #0d6e6e;
+        font-weight: 700;
+    }
+
+    .step-item.done .step-label {
+        color: #0d6e6e;
+    }
+
+    /* ── Cards ── */
+    .wizard-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.75rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,.05);
+        display: none;
+    }
+
+        .wizard-card.active {
+            display: block;
+            animation: fadeIn .25s ease;
+        }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .wizard-card-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1.25rem;
+        padding-bottom: .75rem;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .wizard-card-title .step-badge {
+            background: #0d6e6e;
+            color: #fff;
+            font-size: 11px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+    /* ── Form fields ── */
+    .form-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 4px;
+    }
+
+    .form-control {
+        font-size: 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: .5rem .75rem;
+        transition: border-color .2s;
+    }
+
+        .form-control:focus {
+            border-color: #0d6e6e;
+            box-shadow: 0 0 0 3px rgba(13,110,110,.1);
+            outline: none;
+        }
+
+        .form-control.is-invalid {
+            border-color: #dc3545 !important;
+            background-image: none;
+        }
+
+            .form-control.is-invalid:focus {
+                box-shadow: 0 0 0 3px rgba(220,53,69,.15);
+            }
+
+    .form-text {
+        font-size: 11.5px;
+        color: #94a3b8;
+        margin-top: 3px;
+    }
+
+    .text-danger {
+        font-size: 12px;
+    }
+
+    .section-divider {
+        border: none;
+        border-top: 1px dashed #e2e8f0;
+        margin: 1rem 0;
+    }
+
+    .uploads-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #94a3b8;
+        letter-spacing: .06em;
+        margin-bottom: .75rem;
+    }
+
+    /* ── Navigation buttons ── */
+    .wizard-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1.5rem;
+    }
+
+    .btn-prev {
+        background: transparent;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        padding: .55rem 1.4rem;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all .2s;
+    }
+
+        .btn-prev:hover {
+            border-color: #0d6e6e;
+            color: #0d6e6e;
+        }
+
+    .btn-next, .btn-submit {
+        background: #0d6e6e;
+        color: #fff;
+        border: none;
+        padding: .55rem 1.6rem;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background .2s;
+    }
+
+        .btn-next:hover, .btn-submit:hover {
+            background: #0a5a5a;
+        }
+
+    .step-counter {
+        font-size: 13px;
+        color: #94a3b8;
+    }
+
+    /* ── Declaration ── */
+    .declaration-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 1.25rem 1.5rem;
+        font-size: 13.5px;
+        color: #475569;
+        line-height: 1.7;
+        margin-bottom: 1.25rem;
+    }
+
+    .declaration-check {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 13.5px;
+        color: #374151;
+    }
+
+        .declaration-check input[type=checkbox] {
+            margin-top: 3px;
+            accent-color: #0d6e6e;
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+    /* ── Responsive ── */
+    @@media (max-width: 575px) {
+        .step-label {
+            display: none;
+        }
+
+        .wizard-card {
+            padding: 1.25rem;
+        }
+    }
+</style>
+
+<div class="wizard-wrap">
+
+    <form asp-action="Create" method="post" enctype="multipart/form-data" id="wizardForm" novalidate>
+        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+        <!-- ── Progress bar ── -->
+        <div class="progress-bar-wrap" id="progressBar">
+            <div class="progress-line" id="progressLine" style="width:0%"></div>
+            <div class="step-item active" data-step="1">
+                <div class="step-circle"><span class="step-number">1</span></div>
+                <span class="step-label">Groom Info</span>
             </div>
-            <div class="col-md-6">
-                <label asp-for="HusbandDob" class="form-label"></label>
-                <input asp-for="HusbandDob" class="form-control" type="date" />
-                <span asp-validation-for="HusbandDob" class="text-danger small"></span>
+            <div class="step-item" data-step="2">
+                <div class="step-circle"><span class="step-number">2</span></div>
+                <span class="step-label">Bride Info</span>
             </div>
-            <div class="col-md-6">
-                <label asp-for="HusbandIdNumber" class="form-label"></label>
-                <input asp-for="HusbandIdNumber" class="form-control" />
-                <span asp-validation-for="HusbandIdNumber" class="text-danger small"></span>
+            <div class="step-item" data-step="3">
+                <div class="step-circle"><span class="step-number">3</span></div>
+                <span class="step-label">Details</span>
             </div>
-            <div class="col-md-6">
-                <label asp-for="HusbandContactNumber" class="form-label"></label>
-                <input asp-for="HusbandContactNumber" class="form-control" />
-                <span asp-validation-for="HusbandContactNumber" class="text-danger small"></span>
+            <div class="step-item" data-step="4">
+                <div class="step-circle"><span class="step-number">4</span></div>
+                <span class="step-label">Witnesses</span>
             </div>
-            <div class="col-12">
-                <label asp-for="HusbandAddress" class="form-label"></label>
-                <textarea asp-for="HusbandAddress" class="form-control" rows="2"></textarea>
-                <span asp-validation-for="HusbandAddress" class="text-danger small"></span>
+            <div class="step-item" data-step="5">
+                <div class="step-circle"><span class="step-number">5</span></div>
+                <span class="step-label">Uploads</span>
             </div>
-            <div class="col-12"><hr class="my-1 text-muted" /></div>
-            <div class="col-12">
-                <h6 class="text-secondary small text-uppercase mb-2">Husband — uploads</h6>
-            </div>
-            <div class="col-md-6">
-                <label asp-for="HusbandIdentityDocument" class="form-label"></label>
-                <input asp-for="HusbandIdentityDocument" class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" />
-                <span asp-validation-for="HusbandIdentityDocument" class="text-danger small"></span>
-            </div>
-            <div class="col-md-6">
-                <label asp-for="HusbandPassportPhoto" class="form-label"></label>
-                <input asp-for="HusbandPassportPhoto" class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" />
-                <span asp-validation-for="HusbandPassportPhoto" class="text-danger small"></span>
-            </div>
-            <div class="col-12">
-                <div class="form-text">ID/passport: PDF or clear scan. Photo: passport-style. Max 10 MB each.</div>
+            <div class="step-item" data-step="6">
+                <div class="step-circle"><span class="step-number">6</span></div>
+                <span class="step-label">Declaration</span>
             </div>
         </div>
-    </div>
 
-    <div class="card shadow-sm mb-3">
-        <div class="card-header fw-semibold">Wife</div>
-        <div class="card-body row g-3">
-            <div class="col-md-6">
-                <label asp-for="WifeName" class="form-label"></label>
-                <input asp-for="WifeName" class="form-control" />
-                <span asp-validation-for="WifeName" class="text-danger small"></span>
+        <!-- ══ STEP 1 — Groom Info ══ -->
+        <div class="wizard-card active" id="step1">
+            <div class="wizard-card-title">
+                <span class="step-badge">1 / 6</span> Groom Information
             </div>
-            <div class="col-md-6">
-                <label asp-for="WifeDob" class="form-label"></label>
-                <input asp-for="WifeDob" class="form-control" type="date" />
-                <span asp-validation-for="WifeDob" class="text-danger small"></span>
-            </div>
-            <div class="col-md-6">
-                <label asp-for="WifeIdNumber" class="form-label"></label>
-                <input asp-for="WifeIdNumber" class="form-control" />
-                <span asp-validation-for="WifeIdNumber" class="text-danger small"></span>
-            </div>
-            <div class="col-md-6">
-                <label asp-for="WifeContactNumber" class="form-label"></label>
-                <input asp-for="WifeContactNumber" class="form-control" />
-                <span asp-validation-for="WifeContactNumber" class="text-danger small"></span>
-            </div>
-            <div class="col-12">
-                <label asp-for="WifeAddress" class="form-label"></label>
-                <textarea asp-for="WifeAddress" class="form-control" rows="2"></textarea>
-                <span asp-validation-for="WifeAddress" class="text-danger small"></span>
-            </div>
-            <div class="col-12"><hr class="my-1 text-muted" /></div>
-            <div class="col-12">
-                <h6 class="text-secondary small text-uppercase mb-2">Wife — uploads</h6>
-            </div>
-            <div class="col-md-6">
-                <label asp-for="WifeIdentityDocument" class="form-label"></label>
-                <input asp-for="WifeIdentityDocument" class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" />
-                <span asp-validation-for="WifeIdentityDocument" class="text-danger small"></span>
-            </div>
-            <div class="col-md-6">
-                <label asp-for="WifePassportPhoto" class="form-label"></label>
-                <input asp-for="WifePassportPhoto" class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" />
-                <span asp-validation-for="WifePassportPhoto" class="text-danger small"></span>
-            </div>
-            <div class="col-12">
-                <div class="form-text">ID/passport: PDF or clear scan. Photo: passport-style. Max 10 MB each.</div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="HusbandName" class="form-label"></label>
+                    <input asp-for="HusbandName" class="form-control" placeholder="Full name" />
+                    <span asp-validation-for="HusbandName" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="HusbandDob" class="form-label"></label>
+                    <input asp-for="HusbandDob" class="form-control" type="date" />
+                    <span asp-validation-for="HusbandDob" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="HusbandIdNumber" class="form-label"></label>
+                    <input asp-for="HusbandIdNumber" class="form-control" placeholder="National ID / Passport No." />
+                    <span asp-validation-for="HusbandIdNumber" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="HusbandContactNumber" class="form-label"></label>
+                    <input asp-for="HusbandContactNumber" class="form-control" placeholder="+252 …" />
+                    <span asp-validation-for="HusbandContactNumber" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="HusbandAddress" class="form-label"></label>
+                    <textarea asp-for="HusbandAddress" class="form-control" rows="2" placeholder="District / street address"></textarea>
+                    <span asp-validation-for="HusbandAddress" class="text-danger small"></span>
+                </div>
+                <div class="col-12"><hr class="section-divider" /></div>
+                <div class="col-12"><p class="uploads-label">Groom — document uploads</p></div>
+                <div class="col-md-6">
+                    <label asp-for="HusbandIdentityDocument" class="form-label"></label>
+                    <input asp-for="HusbandIdentityDocument" class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" />
+                    <span asp-validation-for="HusbandIdentityDocument" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="HusbandPassportPhoto" class="form-label"></label>
+                    <input asp-for="HusbandPassportPhoto" class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" />
+                    <span asp-validation-for="HusbandPassportPhoto" class="text-danger small"></span>
+                </div>
+                <div class="col-12"><p class="form-text">ID/passport: PDF or clear scan. Photo: passport-style. Max 10 MB each.</p></div>
             </div>
         </div>
-    </div>
 
-    <div class="card shadow-sm mb-3">
-        <div class="card-header fw-semibold">Witness 1 (Markhaatiye 1)</div>
-        <div class="card-body row g-3">
-            <div class="col-12">
-                <p class="text-muted small mb-0">Enter this witness’s details, then upload their ID/passport document.</p>
+        <!-- ══ STEP 2 — Bride Info ══ -->
+        <div class="wizard-card" id="step2">
+            <div class="wizard-card-title">
+                <span class="step-badge">2 / 6</span> Bride Information
             </div>
-            <div class="col-12">
-                <label asp-for="Witness1.FullName" class="form-label"></label>
-                <input asp-for="Witness1.FullName" class="form-control" />
-                <span asp-validation-for="Witness1.FullName" class="text-danger small"></span>
-            </div>
-            <div class="col-md-6">
-                <label asp-for="Witness1.DateOfBirth" class="form-label"></label>
-                <input asp-for="Witness1.DateOfBirth" class="form-control" type="date" />
-                <span asp-validation-for="Witness1.DateOfBirth" class="text-danger small"></span>
-            </div>
-            <div class="col-md-6">
-                <label asp-for="Witness1.IdNumber" class="form-label"></label>
-                <input asp-for="Witness1.IdNumber" class="form-control" />
-                <span asp-validation-for="Witness1.IdNumber" class="text-danger small"></span>
-            </div>
-            <div class="col-md-6">
-                <label asp-for="Witness1.ContactNumber" class="form-label"></label>
-                <input asp-for="Witness1.ContactNumber" class="form-control" />
-                <span asp-validation-for="Witness1.ContactNumber" class="text-danger small"></span>
-            </div>
-            <div class="col-12">
-                <label asp-for="Witness1.Address" class="form-label"></label>
-                <textarea asp-for="Witness1.Address" class="form-control" rows="2"></textarea>
-                <span asp-validation-for="Witness1.Address" class="text-danger small"></span>
-            </div>
-            <div class="col-12"><hr class="my-1 text-muted" /></div>
-            <div class="col-12">
-                <h6 class="text-secondary small text-uppercase mb-2">Witness 1 — ID upload</h6>
-            </div>
-            <div class="col-md-6">
-                <label asp-for="Witness1IdentityDocument" class="form-label"></label>
-                <input asp-for="Witness1IdentityDocument" class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" />
-                <span asp-validation-for="Witness1IdentityDocument" class="text-danger small"></span>
-                <div class="form-text">PDF or clear photo. Max 10 MB.</div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="WifeName" class="form-label"></label>
+                    <input asp-for="WifeName" class="form-control" placeholder="Full name" />
+                    <span asp-validation-for="WifeName" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="WifeDob" class="form-label"></label>
+                    <input asp-for="WifeDob" class="form-control" type="date" />
+                    <span asp-validation-for="WifeDob" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="WifeIdNumber" class="form-label"></label>
+                    <input asp-for="WifeIdNumber" class="form-control" placeholder="National ID / Passport No." />
+                    <span asp-validation-for="WifeIdNumber" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="WifeContactNumber" class="form-label"></label>
+                    <input asp-for="WifeContactNumber" class="form-control" placeholder="+252 …" />
+                    <span asp-validation-for="WifeContactNumber" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="WifeAddress" class="form-label"></label>
+                    <textarea asp-for="WifeAddress" class="form-control" rows="2" placeholder="District / street address"></textarea>
+                    <span asp-validation-for="WifeAddress" class="text-danger small"></span>
+                </div>
+                <div class="col-12"><hr class="section-divider" /></div>
+                <div class="col-12"><p class="uploads-label">Bride — document uploads</p></div>
+                <div class="col-md-6">
+                    <label asp-for="WifeIdentityDocument" class="form-label"></label>
+                    <input asp-for="WifeIdentityDocument" class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" />
+                    <span asp-validation-for="WifeIdentityDocument" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="WifePassportPhoto" class="form-label"></label>
+                    <input asp-for="WifePassportPhoto" class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" />
+                    <span asp-validation-for="WifePassportPhoto" class="text-danger small"></span>
+                </div>
+                <div class="col-12"><p class="form-text">ID/passport: PDF or clear scan. Photo: passport-style. Max 10 MB each.</p></div>
             </div>
         </div>
-    </div>
 
-    <div class="card shadow-sm mb-3">
-        <div class="card-header fw-semibold">Witness 2 (Markhaatiye 2)</div>
-        <div class="card-body row g-3">
-            <div class="col-12">
-                <p class="text-muted small mb-0">Second required witness — details and ID/passport upload.</p>
+        <!-- ══ STEP 3 — Marriage Details ══ -->
+        <div class="wizard-card" id="step3">
+            <div class="wizard-card-title">
+                <span class="step-badge">3 / 6</span> Marriage Details
             </div>
-            <div class="col-12">
-                <label asp-for="Witness2.FullName" class="form-label"></label>
-                <input asp-for="Witness2.FullName" class="form-control" />
-                <span asp-validation-for="Witness2.FullName" class="text-danger small"></span>
-            </div>
-            <div class="col-md-6">
-                <label asp-for="Witness2.DateOfBirth" class="form-label"></label>
-                <input asp-for="Witness2.DateOfBirth" class="form-control" type="date" />
-                <span asp-validation-for="Witness2.DateOfBirth" class="text-danger small"></span>
-            </div>
-            <div class="col-md-6">
-                <label asp-for="Witness2.IdNumber" class="form-label"></label>
-                <input asp-for="Witness2.IdNumber" class="form-control" />
-                <span asp-validation-for="Witness2.IdNumber" class="text-danger small"></span>
-            </div>
-            <div class="col-md-6">
-                <label asp-for="Witness2.ContactNumber" class="form-label"></label>
-                <input asp-for="Witness2.ContactNumber" class="form-control" />
-                <span asp-validation-for="Witness2.ContactNumber" class="text-danger small"></span>
-            </div>
-            <div class="col-12">
-                <label asp-for="Witness2.Address" class="form-label"></label>
-                <textarea asp-for="Witness2.Address" class="form-control" rows="2"></textarea>
-                <span asp-validation-for="Witness2.Address" class="text-danger small"></span>
-            </div>
-            <div class="col-12"><hr class="my-1 text-muted" /></div>
-            <div class="col-12">
-                <h6 class="text-secondary small text-uppercase mb-2">Witness 2 — ID upload</h6>
-            </div>
-            <div class="col-md-6">
-                <label asp-for="Witness2IdentityDocument" class="form-label"></label>
-                <input asp-for="Witness2IdentityDocument" class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" />
-                <span asp-validation-for="Witness2IdentityDocument" class="text-danger small"></span>
-                <div class="form-text">PDF or clear photo. Max 10 MB.</div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="MarriageDate" class="form-label"></label>
+                    <input asp-for="MarriageDate" class="form-control" type="date" />
+                    <span asp-validation-for="MarriageDate" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="MarriageLocation" class="form-label"></label>
+                    <input asp-for="MarriageLocation" class="form-control" placeholder="Venue / location" />
+                    <span asp-validation-for="MarriageLocation" class="text-danger small"></span>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="card shadow-sm mb-3">
-        <div class="card-header fw-semibold">Marriage</div>
-        <div class="card-body row g-3">
-            <div class="col-md-6">
-                <label asp-for="MarriageDate" class="form-label"></label>
-                <input asp-for="MarriageDate" class="form-control" type="date" />
-                <span asp-validation-for="MarriageDate" class="text-danger small"></span>
+        <!-- ══ STEP 4 — Witnesses ══ -->
+        <div class="wizard-card" id="step4">
+            <div class="wizard-card-title">
+                <span class="step-badge">4 / 6</span> Witnesses
             </div>
-            <div class="col-md-6">
-                <label asp-for="MarriageLocation" class="form-label"></label>
-                <input asp-for="MarriageLocation" class="form-control" />
-                <span asp-validation-for="MarriageLocation" class="text-danger small"></span>
+
+            <p class="uploads-label mb-2">Witness 1 (Markhaatiye 1)</p>
+            <div class="row g-3 mb-3">
+                <div class="col-12">
+                    <label asp-for="Witness1.FullName" class="form-label"></label>
+                    <input asp-for="Witness1.FullName" class="form-control" placeholder="Full name" />
+                    <span asp-validation-for="Witness1.FullName" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Witness1.DateOfBirth" class="form-label"></label>
+                    <input asp-for="Witness1.DateOfBirth" class="form-control" type="date" />
+                    <span asp-validation-for="Witness1.DateOfBirth" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Witness1.IdNumber" class="form-label"></label>
+                    <input asp-for="Witness1.IdNumber" class="form-control" placeholder="ID / Passport No." />
+                    <span asp-validation-for="Witness1.IdNumber" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Witness1.ContactNumber" class="form-label"></label>
+                    <input asp-for="Witness1.ContactNumber" class="form-control" placeholder="+252 …" />
+                    <span asp-validation-for="Witness1.ContactNumber" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Witness1.Address" class="form-label"></label>
+                    <textarea asp-for="Witness1.Address" class="form-control" rows="2" placeholder="District / street"></textarea>
+                    <span asp-validation-for="Witness1.Address" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Witness1IdentityDocument" class="form-label"></label>
+                    <input asp-for="Witness1IdentityDocument" class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" />
+                    <span asp-validation-for="Witness1IdentityDocument" class="text-danger small"></span>
+                    <p class="form-text">PDF or clear photo. Max 10 MB.</p>
+                </div>
             </div>
-            <div class="col-12">
-                <label asp-for="UploadedFiles" class="form-label"></label>
-                <input asp-for="UploadedFiles" class="form-control" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp" />
-                <span asp-validation-for="UploadedFiles" class="text-danger small"></span>
-                <div class="form-text">Optional additional supporting documents. PDF or images, up to 10 MB each.</div>
+
+            <hr class="section-divider" />
+            <p class="uploads-label mb-2">Witness 2 (Markhaatiye 2)</p>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label asp-for="Witness2.FullName" class="form-label"></label>
+                    <input asp-for="Witness2.FullName" class="form-control" placeholder="Full name" />
+                    <span asp-validation-for="Witness2.FullName" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Witness2.DateOfBirth" class="form-label"></label>
+                    <input asp-for="Witness2.DateOfBirth" class="form-control" type="date" />
+                    <span asp-validation-for="Witness2.DateOfBirth" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Witness2.IdNumber" class="form-label"></label>
+                    <input asp-for="Witness2.IdNumber" class="form-control" placeholder="ID / Passport No." />
+                    <span asp-validation-for="Witness2.IdNumber" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Witness2.ContactNumber" class="form-label"></label>
+                    <input asp-for="Witness2.ContactNumber" class="form-control" placeholder="+252 …" />
+                    <span asp-validation-for="Witness2.ContactNumber" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Witness2.Address" class="form-label"></label>
+                    <textarea asp-for="Witness2.Address" class="form-control" rows="2" placeholder="District / street"></textarea>
+                    <span asp-validation-for="Witness2.Address" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Witness2IdentityDocument" class="form-label"></label>
+                    <input asp-for="Witness2IdentityDocument" class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" />
+                    <span asp-validation-for="Witness2IdentityDocument" class="text-danger small"></span>
+                    <p class="form-text">PDF or clear photo. Max 10 MB.</p>
+                </div>
             </div>
         </div>
-    </div>
 
-    <button type="submit" class="btn btn-primary">Submit application</button>
-    <a class="btn btn-link" asp-action="Index">Cancel</a>
-</form>
+        <!-- ══ STEP 5 — Additional Uploads ══ -->
+        <div class="wizard-card" id="step5">
+            <div class="wizard-card-title">
+                <span class="step-badge">5 / 6</span> Supporting Documents
+            </div>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label asp-for="UploadedFiles" class="form-label"></label>
+                    <input asp-for="UploadedFiles" class="form-control" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp" />
+                    <span asp-validation-for="UploadedFiles" class="text-danger small"></span>
+                    <p class="form-text">Optional. PDF or images. Up to 10 MB each. You can select multiple files.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ STEP 6 — Declaration ══ -->
+        <div class="wizard-card" id="step6">
+            <div class="wizard-card-title">
+                <span class="step-badge">6 / 6</span> Declaration &amp; Submit
+            </div>
+            <div class="declaration-box">
+                I hereby declare that all information provided in this marriage application is true, accurate, and complete to the best of my knowledge. I understand that providing false information is a criminal offence under the laws of the Federal Republic of Somalia. I consent to the processing of the personal data provided for the purpose of registering this marriage at Yaqoshiid District.
+            </div>
+            <div class="declaration-check mb-1">
+                <input type="checkbox" id="declareCheck" />
+                <label for="declareCheck">I confirm that the information above is accurate and I accept the terms of this declaration.</label>
+            </div>
+            <span id="declareErr" class="text-danger small d-block mb-2"></span>
+            <p class="form-text">By clicking <strong>Submit Application</strong> you acknowledge and agree to the declaration above.</p>
+        </div>
+
+        <!-- ── Navigation ── -->
+        <div class="wizard-nav">
+            <div>
+                <button type="button" class="btn-prev" id="btnPrev" style="display:none" onclick="changeStep(-1)">← Back</button>
+                <a class="btn btn-link text-secondary" asp-action="Index" style="font-size:13px">Cancel</a>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span class="step-counter" id="stepCounter">Step 1 of 6</span>
+                <button type="button" class="btn-next" id="btnNext" onclick="changeStep(1)">Next →</button>
+                <button type="submit" class="btn-submit" id="btnSubmit" style="display:none">Submit Application</button>
+            </div>
+        </div>
+
+    </form>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        var currentStep = 1;
+        var totalSteps = 6;
+
+        function changeStep(dir) {
+            if (dir === 1 && !validateStep(currentStep)) return;
+
+            var prev = currentStep;
+            currentStep += dir;
+            if (currentStep < 1) currentStep = 1;
+            if (currentStep > totalSteps) currentStep = totalSteps;
+
+            document.getElementById('step' + prev).classList.remove('active');
+            document.getElementById('step' + currentStep).classList.add('active');
+
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateProgress() {
+            var items = document.querySelectorAll('.step-item');
+            items.forEach(function (el) {
+                var s = parseInt(el.getAttribute('data-step'));
+                el.classList.remove('active', 'done');
+                if (s < currentStep) el.classList.add('done');
+                else if (s === currentStep) el.classList.add('active');
+            });
+
+            var pct = ((currentStep - 1) / (totalSteps - 1)) * 100;
+            document.getElementById('progressLine').style.width = pct + '%';
+            document.getElementById('stepCounter').textContent = 'Step ' + currentStep + ' of ' + totalSteps;
+
+            document.getElementById('btnPrev').style.display = currentStep > 1 ? 'inline-block' : 'none';
+            document.getElementById('btnNext').style.display = currentStep < totalSteps ? 'inline-block' : 'none';
+            document.getElementById('btnSubmit').style.display = currentStep === totalSteps ? 'inline-block' : 'none';
+        }
+
+        /* ── Field definitions per step (name attr → label text) ── */
+        var stepFields = {
+            1: [
+                { name: 'HusbandName',          label: 'Groom full name',     type: 'text' },
+                { name: 'HusbandDob',            label: 'Date of birth',       type: 'date' },
+                { name: 'HusbandIdNumber',       label: 'ID number',           type: 'text' },
+                { name: 'HusbandContactNumber',  label: 'Contact number',      type: 'text' },
+                { name: 'HusbandAddress',        label: 'Address',             type: 'text' },
+                { name: 'HusbandIdentityDocument', label: 'Identity document', type: 'file' },
+                { name: 'HusbandPassportPhoto',  label: 'Passport photo',      type: 'file' }
+            ],
+            2: [
+                { name: 'WifeName',              label: 'Bride full name',     type: 'text' },
+                { name: 'WifeDob',               label: 'Date of birth',       type: 'date' },
+                { name: 'WifeIdNumber',          label: 'ID number',           type: 'text' },
+                { name: 'WifeContactNumber',     label: 'Contact number',      type: 'text' },
+                { name: 'WifeAddress',           label: 'Address',             type: 'text' },
+                { name: 'WifeIdentityDocument',  label: 'Identity document',   type: 'file' },
+                { name: 'WifePassportPhoto',     label: 'Passport photo',      type: 'file' }
+            ],
+            3: [
+                { name: 'MarriageDate',          label: 'Marriage date',       type: 'date' },
+                { name: 'MarriageLocation',      label: 'Marriage location',   type: 'text' }
+            ],
+            4: [
+                { name: 'Witness1.FullName',         label: 'Witness 1 full name',   type: 'text' },
+                { name: 'Witness1.DateOfBirth',      label: 'Witness 1 date of birth', type: 'date' },
+                { name: 'Witness1.IdNumber',         label: 'Witness 1 ID number',   type: 'text' },
+                { name: 'Witness1.ContactNumber',    label: 'Witness 1 contact',     type: 'text' },
+                { name: 'Witness1.Address',          label: 'Witness 1 address',     type: 'text' },
+                { name: 'Witness1IdentityDocument',  label: 'Witness 1 ID document', type: 'file' },
+                { name: 'Witness2.FullName',         label: 'Witness 2 full name',   type: 'text' },
+                { name: 'Witness2.DateOfBirth',      label: 'Witness 2 date of birth', type: 'date' },
+                { name: 'Witness2.IdNumber',         label: 'Witness 2 ID number',   type: 'text' },
+                { name: 'Witness2.ContactNumber',    label: 'Witness 2 contact',     type: 'text' },
+                { name: 'Witness2.Address',          label: 'Witness 2 address',     type: 'text' },
+                { name: 'Witness2IdentityDocument',  label: 'Witness 2 ID document', type: 'file' }
+            ],
+            5: [],   /* uploads optional */
+            6: []    /* declaration — handled separately */
+        };
+
+        function getEl(nameAttr) {
+            /* ASP.NET Core renders Witness1.FullName → name="Witness1.FullName" */
+            return document.querySelector('[name="' + nameAttr + '"]');
+        }
+
+        function showError(el, msg) {
+            el.classList.add('is-invalid');
+            /* find or create the error span right after the element */
+            var err = el.nextElementSibling;
+            if (!err || !err.classList.contains('wiz-err')) {
+                err = document.createElement('span');
+                err.className = 'wiz-err text-danger small';
+                el.parentNode.insertBefore(err, el.nextSibling);
+            }
+            err.textContent = msg;
+        }
+
+        function clearError(el) {
+            el.classList.remove('is-invalid');
+            var err = el.nextElementSibling;
+            if (err && err.classList.contains('wiz-err')) err.textContent = '';
+        }
+
+        function validateStep(step) {
+            var fields = stepFields[step] || [];
+            var ok = true;
+
+            fields.forEach(function (f) {
+                var el = getEl(f.name);
+                if (!el) return;
+
+                var empty = (f.type === 'file')
+                    ? el.files.length === 0
+                    : el.value.trim() === '';
+
+                if (empty) {
+                    showError(el, f.label + ' is required.');
+                    ok = false;
+                } else {
+                    clearError(el);
+                }
+
+                /* live clear on input */
+                el.addEventListener('change', function () { clearError(el); }, { once: true });
+            });
+
+            if (step === 6) {
+                var chk = document.getElementById('declareCheck');
+                var errSpan = document.getElementById('declareErr');
+                if (!chk.checked) {
+                    errSpan.textContent = 'You must accept the declaration before submitting.';
+                    ok = false;
+                } else {
+                    errSpan.textContent = '';
+                }
+            }
+
+            return ok;
+        }
+
+        updateProgress();
+    </script>
 }

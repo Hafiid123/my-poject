@@ -1,0 +1,197 @@
+﻿@model online_mr_certi.Models.MarriageApplication
+@{
+    Layout = null; 
+}
+
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shahaadada Meherka - @Model.Id</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+       @@media print {
+        @@page {
+            size: A4;
+            margin: 0; 
+        }
+        body {
+            background-color: white !important;
+        }
+        .no-print { display: none !important; }
+        
+        .print-page {
+            width: 210mm;
+            height: 297mm;
+            padding: 10mm 15mm !important; 
+            margin: 0 !important;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+    }
+
+    .print-page {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 10px auto;
+        padding: 15mm;
+        background: white;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+        }</style>
+</head>
+<body class="bg-gray-100 antialiased p-0 m-0">
+
+    <div class="no-print max-w-4xl mx-auto my-4 px-4 flex justify-between items-center">
+        @{
+            var userRole = Context.Session.GetString("Role");
+        }
+
+        @if (userRole == "Admin" || userRole == "Staff")
+        {
+            <a href="@Url.Action("Applications", "Admin")" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded shadow text-sm font-sans flex items-center gap-1">
+                ⬅️ Ku laabo liiska
+            </a>
+        }
+        else
+        {
+            <a href="@Url.Action("Index", "Applications")" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded shadow text-sm font-sans flex items-center gap-1">
+                ⬅️ Ku laabo liiska
+            </a>
+        }
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow font-sans font-bold flex items-center gap-2 cursor-pointer">
+            🖨️ Daabac Shahaadada
+        </button>
+    </div>
+
+    <div class="print-page max-w-[210mm] min-h-[297mm] mx-auto bg-white px-16 py-12 relative my-6 flex flex-col justify-between select-none">
+
+        <div class="absolute inset-0 flex items-center justify-center opacity-[0.09] pointer-events-none">
+            <img src="~/logo2.png" class="w-[900px] h-[900px] object-contain" />
+        </div>
+
+        <div class="w-full flex flex-col justify-between h-full min-h-[265mm] relative z-10">
+
+            <div class="text-center relative pt-4">
+
+                <div class="grid grid-cols-3 items-center text-[10.5px] font-bold text-gray-900 px-2">
+
+                    <div class="text-left leading-[1.4] tracking-wide font-serif">
+                        JAMHUURIYADDA FEDERAALKA SOOMAALIYA<br>
+                        WASAARADDA AMNIGA GUDAHA
+                    </div>
+
+                    <div class="flex justify-center items-center h-20">
+                        <img src="~/logo2.png" alt="Calamada Qaranka" class="w-50 h-40 object-contain">
+                    </div>
+
+                    <div class="text-right leading-[1.5] font-sans tracking-wide text-[11px]" dir="rtl">
+                        جمهورية الصومال الفيدرالية وزارة الأمن الداخلي
+                        مكتب الوزير
+                    </div>
+                </div>
+
+                <div class="mt-2 text-center">
+                    <p class="text-[11.5px] font-bold text-gray-950 tracking-[0.05em] font-serif">FEDERAL REPUBLIC OF SOMALIA</p>
+                    <p class="text-[9.5px] text-gray-800 font-semibold tracking-wide uppercase mt-0.5">Ministry of Internal Security</p>
+                </div>
+
+                <div class="w-full h-1.5 border-b-4 border-t border-[#000814] mt-4 opacity-90"></div>
+
+                <div class="mt-6">
+                    <h2 class="text-2xl font-bold text-[#0B3C5D] tracking-[0.2em] font-serif">SHAHAADADA MEHERKA</h2>
+                    <p class="text-[10px] text-gray-500 font-medium font-sans tracking-widest mt-1">
+                        MARRIAGE CERTIFICATE 
+                    </p>
+                </div>
+
+                <div class="flex justify-between items-center mt-6 text-[10.5px] font-sans px-2">
+                    @* <div class="text-left">
+                        <p class="text-gray-500 text-[8.5px] uppercase tracking-wider font-bold">Lambarka Codsiga</p>
+                        <p class="font-bold text-gray-900 font-mono text-xs mt-0.5">MCH-@DateTime.Now.ToString("yyyyMMdd")-@(Model.Id)</p>
+                    </div> *@
+                    <div class="text-right">
+                        @* <p class="text-gray-500 text-[8.5px] uppercase tracking-wider font-bold">Lambarka Shahaadada</p> *@
+                        <p class=" text-gray-900 font-mono text-xs mt-0.5">CERT-@DateTime.Now.ToString("yyyy/MM/dd")-00@(Model.Id)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="my-6 text-[13.5px] text-gray-900 leading-[2.4] text-justify font-serif px-2 space-y-4">
+                <p>
+                    Waxan Halkan ku  caddeynaysaa in <strong class="text-black font-bold">@Model.HusbandName</strong> oo ah wiilka
+                     dhashay Tariikhdu markay aheyd
+                    <strong class="text-black font-bold">@Model.HusbandDob.ToString("dd-MMM-yyyy")</strong> aqoonsigiisana yahay <span class="font-mono font-bold bg-gray-50 px-1 border border-gray-200 rounded">@Model.HusbandIdNumber</span>
+                    — iyo <strong class="text-black font-bold">@Model.WifeName</strong> oo ah gabarta  dhalatay Tariikhdu markay aheyd
+                    <strong class="text-black font-bold">@Model.WifeDob.ToString("dd-MMM-yyyy")</strong>, aqoonsigeedana yahay <span class="font-mono font-bold bg-gray-50 px-1 border border-gray-200 rounded">@Model.WifeIdNumber</span>.
+                </p>
+
+                <p>
+                    ayaa <strong class="text-black font-bold">si sharci ah oo gaadhay shuruudaha diinta Islaamka</strong> isku guray maalintii Taarikhdu ee ku beegneed
+                    <strong class="text-black font-bold">@Model.MarriageDate.ToString("dd-MMM-yyyy")</strong>, Degmada   <strong class="text-black font-bold">@Model.MarriageLocation</strong>, Banadir Central Office, Jamhuuriaydda Federaalka Soomaaliya.
+                </p>
+
+                <p>
+                    Guurku wuxuu ku dhacay <strong class="text-black font-bold">heshiis xalaal ah</strong> oo ay ka kala dhinac yihiin labada qof ee la xusay kor, iyadoo la raacay <strong class="text-black font-bold">shuruudaha Fiqiga Islaamka</strong> — oo ay ku jirto oggolaanshaha xogta ee labada dhinac, meher la heshiiyey oo dhan <span class="font-bold underline text-red-800">maher sharciga ah</span>, iyo markhaatiyada sharci u ah. Guurka waxa uu ku dhawaaqay <strong class="text-black font-bold">Sheekh Muuse Cabdiraxmaan Siciid</strong> oo ah Qaadiga u wakiilsan Maxkamadda Sharciga.
+                </p>
+
+                <p>
+                    Shahaadadan waxaa lagu diiwaangeliyey <strong class="text-black font-bold">Diiwaanka Madaniga ee Wasaaradda Amniga Gudaha</strong> waxayna leedahay xoog sharci oo buuxda marka laga eego sharciyada Jamhuuriaydda Federaalka Soomaaliya.
+                </p>
+            </div>
+
+            <div class="my-4 text-[11.5px] px-2 font-serif">
+                @* <h3 class="font-bold text-gray-900 border-b border-gray-300 pb-1 mb-2 tracking-wide text-[11px] uppercase font-sans">Markhaatiyasha Rasmiga Ah / Official Witnesses</h3> *@
+                <p class="text-gray-800 leading-relaxed text-justify">
+                    Waxaan halkan ku markhaati furaynaa annagoo ah markhaatiyasha rasmiga ah ee hoos ku qoran:
+                    @{
+                        var witnesses = Model.Witnesses.OrderBy(w => w.SortOrder).ToList();
+                    }
+                    @for (int i = 0; i < witnesses.Count; i++)
+                    {
+                        <span>Markhaati @(i + 1)-aad oo ah <strong class="text-black font-bold">@witnesses[i].FullName</strong> (Aqoonsi: <span class="font-mono">@witnesses[i].IdNumber</span>)@(i < witnesses.Count - 1 ? " iyo " : ".")</span>
+                    }
+                    Waxayna si buuxda u qireen ansaxnimada iyo munaasabadda meherka rasmiga ah.
+                </p>
+            </div>
+
+            <div class="w-full h-1.5 border-b-4 border-t border-[#000814] mt-4 opacity-90"></div>
+
+            <div class="grid grid-cols-3 gap-4 items-end text-center text-[10.5px] font-sans mt-6 pt-4 border-t border-gray-200">
+                <div class="flex flex-col items-start pl-2">
+                    @* <img src="https://api.qrserver.com/v1/create-qr-code/?size=72x72&data=https://yaqshiidportal.runasp.net/Applications/Details/@Model.Id" class="w-[70px] h-[70px] border border-gray-300 p-0.5 bg-white" alt="Verification QR" /> *@
+                    <p class="text-[7.5px] text-gray-400 mt-1 font-mono tracking-tight">MCH-VERIFY-00@(Model.Id)</p>
+                </div>
+
+                <div class="flex flex-col items-center justify-center pb-1">
+                    <div class="w-[72px] h-[72px] border-2 border-blue-800/30 border-dashed rounded-full flex flex-col items-center justify-center text-blue-800/40 text-[8px] font-bold p-1 uppercase">
+                        <span>Official</span>
+                        <span>Stamp</span>
+                    </div>
+                    <p class="text-[9px] font-bold text-gray-700 mt-2 tracking-wider">CIVIL REGISTRATION</p>
+                </div>
+
+                <div class="text-right pr-2">
+                    <div class="h-10 flex items-end justify-end mb-1">
+                        <p class="font-serif italic text-base font-bold text-gray-900 tracking-wider">@Model.HusbandName</p>
+                    </div>
+                    <div class="w-full h-[1px] bg-gray-400 my-1"></div>
+                    <p class="font-bold text-gray-900 text-[9.5px] uppercase tracking-tight">Director General Civil Registry</p>
+                    <p class="text-[8.5px] text-gray-500 italic mt-0.5">Taariikhda: @DateTime.Now.ToString("dd-MMM-yyyy")</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

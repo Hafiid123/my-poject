@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -11,6 +12,7 @@ namespace online_mr_certi.Controllers;
 
 [RequireLogin]
 [RequireUserRole]
+
 public class ApplicationsController : Controller
 {
     private static readonly string[] AllowedExtensions = [".pdf", ".jpg", ".jpeg", ".png", ".webp"];
@@ -394,5 +396,24 @@ public class ApplicationsController : Controller
         });
         await _db.SaveChangesAsync();
         return true;
+    }
+
+    // Marka la riixo badhanka daabacaadda, URL-ku wuxuu noqonayaa: /MarriageApplications/PrintCertificate/5
+    
+    public async Task<IActionResult> PrintCertificate(int id)
+    {
+        // Waxaan database-ka ka soo akhrinaynaa guurka saxda ah ee la rabo in la daabaco
+        var application = await _db.MarriageApplications
+            .Include(x => x.Witnesses)  // Si markhaatiyada loo soo bandhigo
+            .Include(x => x.Documents)  // Si sawirada loola soo baxo
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (application == null)
+        {
+            return NotFound();
+        }
+
+        // Waxay si toos ah koodhka ugu hageysaa faylkii .cshtml ee aan talaabadii 1aad ku sameynay
+        return View("~/Views/Certificates/Preview.cshtml", application);
     }
 }

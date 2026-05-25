@@ -6,6 +6,7 @@ using online_mr_certi.Infrastructure;
 using online_mr_certi.Models;
 using online_mr_certi.Models.ViewModels;
 using online_mr_certi.Services;
+using SkiaSharp;
 
 namespace online_mr_certi.Controllers;
 
@@ -544,6 +545,155 @@ public class AdminController : Controller
         return RedirectToAction(nameof(Users));
     }
 
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateApplication(MarriageApplicationCreateViewModel model)
+    {
+        if (ModelState.IsValid)
+        {
+            // 1. Map-ka u samee Model-ka rasmiga ah (MarriageApplication)
+            var application = new MarriageApplication
+            {
+                UserId = model.UserId, // User-kii laga doortay Dropdown-ka sare
+
+
+                HusbandName = model.HusbandName,
+                HusbandDob = model.HusbandDob,
+                HusbandIdNumber = model.HusbandIdNumber,
+                HusbandContactNumber = model.HusbandContactNumber,
+                HusbandAddress = model.HusbandAddress,
+
+                WifeName = model.WifeName,
+                WifeDob = model.WifeDob,
+                WifeIdNumber = model.WifeIdNumber,
+                WifeContactNumber = model.WifeContactNumber,
+                WifeAddress = model.WifeAddress,
+
+                MarriageDate = model.MarriageDate,
+                MarriageLocation = model.MarriageLocation,
+
+                Status = ApplicationStatus.Approved, // Toos waa Approved maadaama uu Admin-ku xafiiska ka qorayo
+                SubmissionDate = DateTime.Now
+            };
+
+            // 2. Badbaadi oo toos ugu xir Faylasha (Documents) miiska 'documents'
+            var documents = new List<Document>();
+
+            if (model.HusbandIdentityDocument != null)
+                documents.Add(new Document { Category = DocumentCategories.HusbandIdentityDocument, FilePath = await SaveFileAsync(model.HusbandIdentityDocument) });
+
+            if (model.HusbandPassportPhoto != null)
+                documents.Add(new Document { Category = DocumentCategories.HusbandPassportPhoto, FilePath = await SaveFileAsync(model.HusbandPassportPhoto) });
+
+            if (model.WifeIdentityDocument != null)
+                documents.Add(new Document { Category = DocumentCategories.WifeIdentityDocument, FilePath = await SaveFileAsync(model.WifeIdentityDocument) });
+
+            if (model.WifePassportPhoto != null)
+                documents.Add(new Document { Category = DocumentCategories.WifePassportPhoto, FilePath = await SaveFileAsync(model.WifePassportPhoto) });
+
+            if (model.Witness1IdentityDocument != null)
+                documents.Add(new Document { Category = DocumentCategories.Witness1IdentityDocument, FilePath = await SaveFileAsync(model.Witness1IdentityDocument) });
+
+            if (model.Witness2IdentityDocument != null)
+                documents.Add(new Document { Category = DocumentCategories.Witness2IdentityDocument, FilePath = await SaveFileAsync(model.Witness2IdentityDocument) });
+
+            // Haddii ay jiraan faylal dheeri ah (Optional Supporting Files)
+            if (model.UploadedFiles != null && model.UploadedFiles.Count > 0)
+            {
+                foreach (var file in model.UploadedFiles)
+                {
+                    documents.Add(new Document { Category = DocumentCategories.Supporting, FilePath = await SaveFileAsync(file) });
+                }
+            }
+
+            // Toos ugu dar application-ka ka hor intaanan db-ga ku shubin
+            application.Documents = documents;
+
+            _db.MarriageApplications.Add(application); // Waxaa loo beddelay _db
+            await _db.SaveChangesAsync(); // Waxay wada badbaadinaysaa Application-ka iyo Documents-ka
+
+            // 3. Kaydi Labada Markhaati (MarriageWitness)
+            var witness1 = new MarriageWitness
+            {
+                ApplicationId = application.Id,
+                SortOrder = 1,
+                FullName = model.Witness1.FullName,
+                DateOfBirth = model.Witness1.DateOfBirth,
+                IdNumber = model.Witness1.IdNumber,
+                ContactNumber = model.Witness1.ContactNumber,
+                Address = model.Witness1.Address
+            };
+
+            var witness2 = new MarriageWitness
+            {
+                ApplicationId = application.Id,
+                SortOrder = 2,
+                FullName = model.Witness2.FullName,
+                DateOfBirth = model.Witness2.DateOfBirth,
+                IdNumber = model.Witness2.IdNumber,
+                ContactNumber = model.Witness2.ContactNumber,
+                Address = model.Witness2.Address
+            };
+
+            _db.MarriageWitnesses.AddRange(witness1, witness2); // Waxaa loo beddelay _db
+            await _db.SaveChangesAsync();
+
+            // 4. TOOS U DHCellI SHAHADDADA (Halkan baa aad ugu muhiimsan!)
+            // Maadaama Status-ku uu yahay Approved, waa inaan u dhalinaa PDF-ka si loogu daabaco meesha
+            await EnsureCertificateAsync(application);
+            await _db.SaveChangesAsync(); // Badbaadi shahaadada miiska Certificates lagu daray
+
+            TempData["SuccessMessage"] = "Codsiga guurka, dukumentiyada, markhaatiyada iyo shahaadada si guul leh ayaa loo kaydiyey!";
+            return RedirectToAction("Index");
+        }
+
+        // Haddii ay wax khaldamaan, dib u soo rari liiska Users-ka
+        ViewBag.Users = _db.Users.Where(u => u.Role == AppRoles.User).Select(u => new { Id = u.Id, Name = u.Name }).ToList();
+        return View(model);
+    }
+
+
+
+    // GET: Admin/RegisterApplicant
+    [HttpGet]
+    public IActionResult RegisterApplicant()
+    {
+        return View();
+    }
+
+    // POST: Admin/RegisterApplicant
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RegisterApplicant(User user)
+    {
+        // Waxaan hubineynaa in Email-ku uusan horay u jirin
+        var emailExists = _db.Users.Any(u => u.Email == user.Email);
+        if (emailExists)
+        {
+            ModelState.AddModelError("Email", "Email-kaan hore ayaa nidaamka uga jira.");
+        }
+
+        if (ModelState.IsValid)
+        {
+            // Waxaan siinaa Role-ka caadiga ah ee Portal-ka uu ku galo
+            user.Role = AppRoles.User;
+            user.PaymentStatus = UserPaymentStatuses.Unpaid;
+            user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+
+            // Markuu badbaado, wuxuu u celinayaa Admin-ka liiska codsiyada
+            return RedirectToAction("Index");
+        }
+
+        return View(user);
+    }
+
+
+
     // ── DELETE PAYMENT ──────────────────────────
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -710,6 +860,34 @@ public class AdminController : Controller
         TempData["Message"] = "Fee created.";
         return RedirectToAction(nameof(FeesSettings));
     }
+
+
+    public async Task<IActionResult> PrintCertificate(int id)
+    {
+        var application = await _db.MarriageApplications
+            .Include(x => x.Witnesses)
+            .Include(x => x.Documents)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (application == null)
+            return NotFound();
+
+        return View("~/Views/Certificates/Preview.cshtml", application);
+    }
+
+
+    [HttpGet]
+    [RequirePermission(AppPermissions.CreateApplication)] // ama permission-ka saxda ah
+    public IActionResult CreateApplication()
+    {
+        ViewBag.Users = _db.Users
+            .Where(u => u.Role == AppRoles.User)
+            .Select(u => new { u.Id, u.Name, u.Email })
+            .ToList();
+
+        return View();
+    }
+
 
     [HttpGet]
     [RequirePermission(AppPermissions.ManageFees)]
@@ -1187,5 +1365,23 @@ public class AdminController : Controller
             ApplicationId = app.Id,
             CertificateFile = relative
         });
+    }
+
+    private async Task<string> SaveFileAsync(IFormFile file)
+    {
+        if (file == null || file.Length == 0) return string.Empty;
+
+        var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads");
+        if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+        var fileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+        var filePath = Path.Combine(uploadsFolder, fileName);
+
+        using (var fileStream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(fileStream);
+        }
+
+        return "/uploads/" + fileName;
     }
 }

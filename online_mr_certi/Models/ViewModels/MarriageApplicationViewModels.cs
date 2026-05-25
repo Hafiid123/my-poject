@@ -28,6 +28,10 @@ public class WitnessFormModel
 
 public class MarriageApplicationCreateViewModel : IValidatableObject
 {
+    [Required(ErrorMessage = "Fadlan dooro applicant account-ka qofka codsanaya.")]
+    [Display(Name = "Select Applicant")]
+    public int UserId { get; set; }
+
     [Required, MaxLength(200)]
     [Display(Name = "Husband full name")]
     public string HusbandName { get; set; } = string.Empty;

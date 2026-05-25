@@ -6,7 +6,10 @@ using online_mr_certi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 builder.Services.Configure<ManualPaymentOptions>(
+
+
     builder.Configuration.GetSection(ManualPaymentOptions.SectionName));
 
 builder.Services.AddControllersWithViews();
@@ -19,6 +22,8 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
     options.Cookie.Name = ".MarriageCert.Session";
 });
+
+
 
 var conn = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");

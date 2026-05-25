@@ -1,4 +1,4 @@
-@model List<online_mr_certi.Models.MarriageApplication>
+﻿@model List<online_mr_certi.Models.MarriageApplication>
 @using online_mr_certi.Models
 @{
     ViewData["Title"] = "Applications";
@@ -62,14 +62,14 @@
 </div>
 
 <div class="card">
-    @* <div class="card-header"><h3 class="card-title">Applications (@Model.Count)</h3>
+    <div class="card-header"><h3 class="card-title">Applications (@Model.Count)</h3>
         <div class="d-flex justify-content-end mb-2 px-2">
             <a asp-action="CreateApplication" asp-controller="Admin"
                class="btn btn-primary me-5">
                 <i class="fas fa-user-plus"></i> Create New Application
             </a>
         </div>
-    </div> *@
+    </div>
 
     <div class="card-body table-responsive p-0">
         <table class="table table-striped mb-0">
@@ -122,6 +122,14 @@
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
+
+                            @if (a.Status == ApplicationStatus.Approved)
+                            {
+                                <a asp-controller="Admin" asp-action="PrintCertificate" asp-route-id="@a.Id"
+                                   class="btn btn-sm btn-secondary" target="_blank">
+                                    <i class="fas fa-print"></i> Print
+                                </a>
+                            }
                         </td>
                         
                     </tr>

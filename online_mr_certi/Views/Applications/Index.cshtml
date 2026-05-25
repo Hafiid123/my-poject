@@ -615,8 +615,8 @@ else
                                     @if (a.Status == ApplicationStatus.Approved && a.Certificate != null)
                                     {
                                         <a class="btn-action btn-action-cert"
-                                           asp-action="DownloadCertificate" asp-route-id="@a.Id">
-                                            <i class="fas fa-download"></i> Certificate
+                                           asp-action="PrintCertificate" asp-route-id="@a.Id" target="_blank">
+                                            <i class="fas fa-print"></i> Print Certificate
                                         </a>
                                     }
                                 </div>

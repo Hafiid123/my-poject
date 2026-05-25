@@ -1,0 +1,425 @@
+﻿@model online_mr_certi.Models.ViewModels.MarriageApplicationCreateViewModel
+@{
+    ViewData["Title"] = "New Marriage Application";
+}
+
+@* <div class="row mb-3">
+    <div class="col-sm-6">
+        <h4 class="m-0">
+            <i class="fas fa-file-contract mr-2 text-primary"></i> New Marriage Application
+        </h4>
+    </div>
+    <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a asp-action="Index">Dashboard</a></li>
+            <li class="breadcrumb-item"><a asp-action="Applications">Applications</a></li>
+            <li class="breadcrumb-item active">New</li>
+        </ol>
+    </div>
+</div> *@
+
+<form asp-action="CreateApplication" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <i class="icon fas fa-ban"></i> Please fix the errors below.
+    </div>
+
+    
+    <div class="card card-outline card-primary mb-3">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fas fa-user-circle mr-1"></i> Applicant Account
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                <label asp-for="UserId" class="font-weight-bold">
+                    Select Registered User <span class="text-danger">*</span>
+                </label>
+                <select asp-for="UserId" class="form-control" required>
+                    <option value="">-- Select Applicant --</option>
+                    @if (ViewBag.Users != null)
+                    {
+                        foreach (var user in ViewBag.Users)
+                        {
+                            <option value="@user.Id">@user.Name — @user.Email</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="UserId" class="text-danger small"></span>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="card card-outline card-info mb-3">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-male mr-1"></i> Husband Details</h3>
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="HusbandName"></label>
+                        <input asp-for="HusbandName" class="form-control" placeholder="Full name" />
+                        <span asp-validation-for="HusbandName" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="HusbandDob"></label>
+                        <input asp-for="HusbandDob" class="form-control" type="date" />
+                        <span asp-validation-for="HusbandDob" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="HusbandIdNumber"></label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                            </div>
+                            <input asp-for="HusbandIdNumber" class="form-control" placeholder="National ID" />
+                        </div>
+                        <span asp-validation-for="HusbandIdNumber" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="HusbandContactNumber"></label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                            </div>
+                            <input asp-for="HusbandContactNumber" class="form-control" placeholder="Phone number" />
+                        </div>
+                        <span asp-validation-for="HusbandContactNumber" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="form-group">
+                        <label asp-for="HusbandAddress"></label>
+                        <textarea asp-for="HusbandAddress" class="form-control" rows="2" placeholder="Full address"></textarea>
+                        <span asp-validation-for="HusbandAddress" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <p class="text-muted mb-2"><i class="fas fa-paperclip mr-1"></i> Documents</p>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="HusbandIdentityDocument"></label>
+                        <div class="custom-file">
+                            <input asp-for="HusbandIdentityDocument" type="file" class="custom-file-input"
+                                   accept=".pdf,.jpg,.jpeg,.png,.webp" id="hIdDoc" />
+                            <label class="custom-file-label" for="hIdDoc">Choose file…</label>
+                        </div>
+                        <span asp-validation-for="HusbandIdentityDocument" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="HusbandPassportPhoto"></label>
+                        <div class="custom-file">
+                            <input asp-for="HusbandPassportPhoto" type="file" class="custom-file-input"
+                                   accept=".pdf,.jpg,.jpeg,.png,.webp" id="hPhoto" />
+                            <label class="custom-file-label" for="hPhoto">Choose file…</label>
+                        </div>
+                        <span asp-validation-for="HusbandPassportPhoto" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="card card-outline card-warning mb-3">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-female mr-1"></i> Wife Details</h3>
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="WifeName"></label>
+                        <input asp-for="WifeName" class="form-control" placeholder="Full name" />
+                        <span asp-validation-for="WifeName" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="WifeDob"></label>
+                        <input asp-for="WifeDob" class="form-control" type="date" />
+                        <span asp-validation-for="WifeDob" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="WifeIdNumber"></label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                            </div>
+                            <input asp-for="WifeIdNumber" class="form-control" placeholder="National ID" />
+                        </div>
+                        <span asp-validation-for="WifeIdNumber" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="WifeContactNumber"></label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                            </div>
+                            <input asp-for="WifeContactNumber" class="form-control" placeholder="Phone number" />
+                        </div>
+                        <span asp-validation-for="WifeContactNumber" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="form-group">
+                        <label asp-for="WifeAddress"></label>
+                        <textarea asp-for="WifeAddress" class="form-control" rows="2" placeholder="Full address"></textarea>
+                        <span asp-validation-for="WifeAddress" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <p class="text-muted mb-2"><i class="fas fa-paperclip mr-1"></i> Documents</p>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="WifeIdentityDocument"></label>
+                        <div class="custom-file">
+                            <input asp-for="WifeIdentityDocument" type="file" class="custom-file-input"
+                                   accept=".pdf,.jpg,.jpeg,.png,.webp" id="wIdDoc" />
+                            <label class="custom-file-label" for="wIdDoc">Choose file…</label>
+                        </div>
+                        <span asp-validation-for="WifeIdentityDocument" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="WifePassportPhoto"></label>
+                        <div class="custom-file">
+                            <input asp-for="WifePassportPhoto" type="file" class="custom-file-input"
+                                   accept=".pdf,.jpg,.jpeg,.png,.webp" id="wPhoto" />
+                            <label class="custom-file-label" for="wPhoto">Choose file…</label>
+                        </div>
+                        <span asp-validation-for="WifePassportPhoto" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card card-outline card-secondary mb-3">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-user-check mr-1"></i> Witness 1</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label asp-for="Witness1.FullName"></label>
+                        <input asp-for="Witness1.FullName" class="form-control" placeholder="Full name" />
+                        <span asp-validation-for="Witness1.FullName" class="text-danger small"></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Witness1.DateOfBirth"></label>
+                                <input asp-for="Witness1.DateOfBirth" class="form-control" type="date" />
+                                <span asp-validation-for="Witness1.DateOfBirth" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Witness1.IdNumber"></label>
+                                <input asp-for="Witness1.IdNumber" class="form-control" placeholder="ID number" />
+                                <span asp-validation-for="Witness1.IdNumber" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Witness1.ContactNumber"></label>
+                        <input asp-for="Witness1.ContactNumber" class="form-control" placeholder="Phone" />
+                        <span asp-validation-for="Witness1.ContactNumber" class="text-danger small"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Witness1.Address"></label>
+                        <textarea asp-for="Witness1.Address" class="form-control" rows="2"></textarea>
+                        <span asp-validation-for="Witness1.Address" class="text-danger small"></span>
+                    </div>
+                    <hr />
+                    <div class="form-group">
+                        <label asp-for="Witness1IdentityDocument"></label>
+                        <div class="custom-file">
+                            <input asp-for="Witness1IdentityDocument" type="file" class="custom-file-input"
+                                   accept=".pdf,.jpg,.jpeg,.png,.webp" id="w1Doc" />
+                            <label class="custom-file-label" for="w1Doc">Choose file…</label>
+                        </div>
+                        <span asp-validation-for="Witness1IdentityDocument" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card card-outline card-secondary mb-3">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-user-check mr-1"></i> Witness 2</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label asp-for="Witness2.FullName"></label>
+                        <input asp-for="Witness2.FullName" class="form-control" placeholder="Full name" />
+                        <span asp-validation-for="Witness2.FullName" class="text-danger small"></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Witness2.DateOfBirth"></label>
+                                <input asp-for="Witness2.DateOfBirth" class="form-control" type="date" />
+                                <span asp-validation-for="Witness2.DateOfBirth" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Witness2.IdNumber"></label>
+                                <input asp-for="Witness2.IdNumber" class="form-control" placeholder="ID number" />
+                                <span asp-validation-for="Witness2.IdNumber" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Witness2.ContactNumber"></label>
+                        <input asp-for="Witness2.ContactNumber" class="form-control" placeholder="Phone" />
+                        <span asp-validation-for="Witness2.ContactNumber" class="text-danger small"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Witness2.Address"></label>
+                        <textarea asp-for="Witness2.Address" class="form-control" rows="2"></textarea>
+                        <span asp-validation-for="Witness2.Address" class="text-danger small"></span>
+                    </div>
+                    <hr />
+                    <div class="form-group">
+                        <label asp-for="Witness2IdentityDocument"></label>
+                        <div class="custom-file">
+                            <input asp-for="Witness2IdentityDocument" type="file" class="custom-file-input"
+                                   accept=".pdf,.jpg,.jpeg,.png,.webp" id="w2Doc" />
+                            <label class="custom-file-label" for="w2Doc">Choose file…</label>
+                        </div>
+                        <span asp-validation-for="Witness2IdentityDocument" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="card card-outline card-success mb-3">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-ring mr-1"></i> Marriage Details</h3>
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="MarriageDate"></label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                            </div>
+                            <input asp-for="MarriageDate" class="form-control" type="date" />
+                        </div>
+                        <span asp-validation-for="MarriageDate" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="MarriageLocation"></label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                            </div>
+                            <input asp-for="MarriageLocation" class="form-control" placeholder="City / District" />
+                        </div>
+                        <span asp-validation-for="MarriageLocation" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="form-group">
+                        <label asp-for="UploadedFiles">
+                            Additional Supporting Documents
+                            <small class="text-muted">(PDF, JPG, PNG — optional)</small>
+                        </label>
+                        <div class="custom-file">
+                            <input asp-for="UploadedFiles" type="file" class="custom-file-input"
+                                   multiple accept=".pdf,.jpg,.jpeg,.png,.webp" id="suppDocs" />
+                            <label class="custom-file-label" for="suppDocs">Choose files…</label>
+                        </div>
+                        <span asp-validation-for="UploadedFiles" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="card mb-4">
+        <div class="card-body d-flex justify-content-between">
+            <a asp-action="Applications" class="btn btn-secondary">
+                <i class="fas fa-arrow-left mr-1"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary btn-lg px-5">
+                <i class="fas fa-save mr-1"></i> Submit Application
+            </button>
+        </div>
+    </div>
+
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.querySelectorAll('.custom-file-input').forEach(function (input) {
+            input.addEventListener('change', function () {
+                var label = this.nextElementSibling;
+                label.textContent = this.files.length === 1
+                    ? this.files[0].name
+                    : this.files.length + ' files selected';
+            });
+        });
+    </script>
+}

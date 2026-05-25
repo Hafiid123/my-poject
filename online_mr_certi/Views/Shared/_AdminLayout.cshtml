@@ -89,6 +89,13 @@
                             </a>
                         </li>
 
+                        <li class="nav-item">
+                            <a asp-action="RegisterApplicant" asp-controller="Admin" class="nav-link">
+                                <i class="nav-icon fas fa-user-plus"></i>
+                                <p>Register New Applicant</p>
+                            </a>
+                        </li>
+
                         @* Applications - ViewApplication *@
                         @if (CanSee(AppPermissions.ViewApplication))
                         {
@@ -108,7 +115,7 @@
                                 <a asp-controller="Admin" asp-action="FeesSettings"
                                    class="nav-link @(feesMenuActive ? "active" : "")">
                                     <i class="nav-icon fas fa-dollar-sign"></i>
-                                    <p>Fees Settings</p>
+                                    <p>Fees Setup</p>
                                 </a>
                             </li>
                         }
@@ -136,30 +143,40 @@
                                 </a>
                             </li>
                         }
+                        <li class="nav-header">MAINTENANCE</li>
 
-                        @* Users - ManageUsers *@
-                        @if (CanSee(AppPermissions.ManageUsers))
-                        {
-                            <li class="nav-item">
-                                <a asp-controller="Admin" asp-action="Users"
-                                   class="nav-link @(adminAction == "Users" ? "active" : "")">
-                                    <i class="nav-icon fas fa-users"></i>
-                                    <p>Users</p>
-                                </a>
-                            </li>
-                        }
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-cog"></i>
+                                <p> Settings <i class="fas fa-angle-left right"></i> </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                @* Users - ManageUsers *@
+                                @if (CanSee(AppPermissions.ManageUsers))
+                                {
+                                    <li class="nav-item">
+                                        <a asp-controller="Admin" asp-action="Users"
+                                           class="nav-link @(adminAction == "Users" ? "active" : "")">
+                                            <i class="nav-icon fas fa-users"></i>
+                                            <p>Users</p>
+                                        </a>
+                                    </li>
+                                }
 
-                        @* Roles - ManageRoles *@
-                        @if (CanSee(AppPermissions.ManageRoles))
-                        {
-                            <li class="nav-item">
-                                <a asp-controller="Admin" asp-action="Roles"
-                                   class="nav-link @(rolesMenuActive ? "active" : "")">
-                                    <i class="nav-icon fas fa-user-shield"></i>
-                                    <p>Roles</p>
-                                </a>
-                            </li>
-                        }
+                                @* Roles - ManageRoles *@
+                                @if (CanSee(AppPermissions.ManageRoles))
+                                {
+                                    <li class="nav-item">
+                                        <a asp-controller="Admin" asp-action="Roles"
+                                           class="nav-link @(rolesMenuActive ? "active" : "")">
+                                            <i class="nav-icon fas fa-user-shield"></i>
+                                            <p>Roles</p>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </li>
+                       
 
                         @* Logout - Everyone *@
                         <li class="nav-item mt-3">
