@@ -2,20 +2,3 @@ bin/
 obj/
 .vs/
 *.user
-
-# Uploads
-wwwroot/uploads/
-
-# Generated files
-*.pdf
-
-# Images
-*.jpg
-*.png
-*.webp
-
-# Logs
-*.log
-
-# Temp
-*.tmp
